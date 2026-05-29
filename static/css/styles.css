@@ -187,16 +187,24 @@ body::after {
   will-change: transform;
 }
 
-/* Minimiza suavemente ao rolar para baixo: encolhe e fica discreta, sem
-   sumir. Volta ao normal ao subir, ao passar o mouse ou perto do topo. */
+/* Ao rolar para baixo: o nome da empresa some (fica só a logo) e as duas
+   pílulas deslizam para fora da tela. Voltam suavemente ao subir / topo.
+   A barra deixa de capturar cliques para não bloquear o conteúdo. */
 .topbar.topbar-min {
-  transform: scale(0.85);
-  transform-origin: top center;
-  opacity: 0.5;
+  pointer-events: none;
 }
-.topbar.topbar-min:hover {
-  transform: scale(1);
-  opacity: 1;
+.topbar.topbar-min .brand-title {
+  max-width: 0;
+  opacity: 0;
+  margin-left: -14px;
+}
+.topbar.topbar-min .brand {
+  transform: translateX(calc(-100% - 100px));
+  opacity: 0;
+}
+.topbar.topbar-min .topnav {
+  transform: translateX(calc(100% + 100px));
+  opacity: 0;
 }
 
 .brand {
@@ -210,6 +218,9 @@ body::after {
   border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 8px 22px 8px 8px;
   border-radius: 999px;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s ease;
+  will-change: transform;
   backdrop-filter: blur(24px) saturate(165%);
   -webkit-backdrop-filter: blur(24px) saturate(165%);
   box-shadow:
@@ -245,6 +256,11 @@ body::after {
   flex-direction: column;
   gap: 2px;
   line-height: 1.1;
+  max-width: 240px;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease, margin 0.45s ease;
 }
 
 .brand-title strong {
@@ -277,6 +293,9 @@ body::after {
     0 10px 30px rgba(0, 0, 0, 0.22);
   flex-wrap: wrap;
   justify-content: center;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s ease;
+  will-change: transform;
 }
 
 @media (max-width: 560px) {
