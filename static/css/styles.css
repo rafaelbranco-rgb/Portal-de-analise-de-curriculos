@@ -177,23 +177,24 @@ body::after {
   gap: 24px;
   margin-bottom: 32px;
   flex-wrap: wrap;
-  /* Mantém o cabeçalho fixo no topo ao rolar a página */
+  /* Fixa no topo ao rolar — a barra fica transparente; apenas os
+     elementos (logo e menu) têm o efeito liquid glass */
   position: sticky;
-  top: 0;
+  top: 14px;
   z-index: 50;
-  padding: 16px clamp(20px, 5vw, 56px);
-  margin-left: calc(-1 * clamp(20px, 5vw, 56px));
-  margin-right: calc(-1 * clamp(20px, 5vw, 56px));
-  background: rgba(8, 13, 26, 0.72);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--glass-border);
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 14px;
+  /* Mesmo "liquid glass" do menu, para harmonizar */
+  background: rgba(8, 13, 26, 0.5);
+  border: 1px solid var(--glass-border);
+  padding: 8px 22px 8px 8px;
+  border-radius: 999px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .brand-mark {
@@ -2023,10 +2024,6 @@ main {
 
   --shadow-1: 0 10px 30px rgba(20, 30, 60, 0.10);
   --shadow-2: 0 20px 60px rgba(20, 30, 60, 0.14);
-}
-
-:root[data-theme="light"] .topbar {
-  background: rgba(248, 250, 255, 0.80);
 }
 
 :root[data-theme="light"] body {
