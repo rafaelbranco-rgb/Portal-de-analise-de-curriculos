@@ -1,0 +1,1133 @@
+[
+  {
+    "id": "8832a919-d6f0-4f88-941d-5fdbfa0df216",
+    "criado_em": "2026-05-28T19:01:56.132609+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Vaga Teste de Auditoria",
+    "meta": {
+      "vaga_id": "42968264-169a-4cb7-a209-5984857a7b11",
+      "titulo": "Vaga Teste de Auditoria"
+    }
+  },
+  {
+    "id": "6d2c34dc-3a4e-4f4f-9194-7fd26d1068da",
+    "criado_em": "2026-05-28T19:01:56.181408+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: Vaga Teste de Auditoria",
+    "meta": {
+      "vaga_id": "42968264-169a-4cb7-a209-5984857a7b11",
+      "titulo": "Vaga Teste de Auditoria"
+    }
+  },
+  {
+    "id": "620f1158-a621-462a-a137-b6f0de3d673c",
+    "criado_em": "2026-05-28T19:46:39.556316+00:00",
+    "category": "analise",
+    "action": "failed",
+    "level": "error",
+    "message": "Falha na análise: curriculo_teste.txt",
+    "meta": {
+      "arquivo": "curriculo_teste.txt",
+      "kind": "api",
+      "mensagem": "Erro inesperado ao chamar o Gemini. Tente novamente em alguns segundos."
+    }
+  },
+  {
+    "id": "0e3dc65a-ad8d-4092-bf5c-06eb370b8b41",
+    "criado_em": "2026-05-28T19:46:44.618604+00:00",
+    "category": "analise",
+    "action": "failed",
+    "level": "error",
+    "message": "Falha na análise: curriculo_teste.txt",
+    "meta": {
+      "arquivo": "curriculo_teste.txt",
+      "kind": "api",
+      "mensagem": "Erro inesperado ao chamar o Gemini. Tente novamente em alguns segundos."
+    }
+  },
+  {
+    "id": "fba5c708-b508-4806-bad6-2a2c1577e6ac",
+    "criado_em": "2026-05-28T19:46:56.460833+00:00",
+    "category": "analise",
+    "action": "failed",
+    "level": "error",
+    "message": "Falha na análise: curriculo_teste.txt",
+    "meta": {
+      "arquivo": "curriculo_teste.txt",
+      "kind": "api",
+      "mensagem": "Erro inesperado ao chamar o Gemini. Tente novamente em alguns segundos."
+    }
+  },
+  {
+    "id": "52d6bef8-ff2a-41c0-9dc3-b56ff200fd1e",
+    "criado_em": "2026-05-28T19:47:18.708097+00:00",
+    "category": "analise",
+    "action": "failed",
+    "level": "error",
+    "message": "Falha na análise: curriculo_teste.txt",
+    "meta": {
+      "arquivo": "curriculo_teste.txt",
+      "kind": "api",
+      "mensagem": "Erro inesperado ao chamar o Gemini. Tente novamente em alguns segundos."
+    }
+  },
+  {
+    "id": "15806fce-dad0-48e7-aafe-2f38c8de9a98",
+    "criado_em": "2026-05-28T19:49:18.356306+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: JOAO DA SILVA — Média aderência (6.0/10)",
+    "meta": {
+      "analise_id": "f41a832d-70ab-4b2e-8f6b-06d13cd20eb4",
+      "candidato": "JOAO DA SILVA",
+      "arquivo": "curriculo_teste.txt",
+      "score": 6.0,
+      "classificacao": "Média aderência",
+      "vaga_recomendada": "Estagiário de T.I. (Foco em Desenvolvimento)",
+      "ia_probabilidade": 10
+    }
+  },
+  {
+    "id": "9fbb9619-7ee1-46f6-a04b-301032a0cd2d",
+    "criado_em": "2026-05-28T19:49:33.689424+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: JOAO DA SILVA — Alta aderência (8.3/10)",
+    "meta": {
+      "analise_id": "a79d8b76-40eb-4657-b395-a993ee54784d",
+      "candidato": "JOAO DA SILVA",
+      "arquivo": "curriculo_teste.txt",
+      "score": 8.3,
+      "classificacao": "Alta aderência",
+      "vaga_recomendada": "Estagiário de T.I. (Foco em Desenvolvimento)",
+      "ia_probabilidade": 45
+    }
+  },
+  {
+    "id": "60b0d9f6-2b50-4f12-a221-181e4e09c164",
+    "criado_em": "2026-05-28T20:00:39.229936+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: JOAO DA SILVA — Alta aderência (9.0/10)",
+    "meta": {
+      "analise_id": "3c9480b7-261a-4f54-8efa-2dca301aa8a1",
+      "candidato": "JOAO DA SILVA",
+      "arquivo": "curriculo_teste.txt",
+      "score": 9.0,
+      "classificacao": "Alta aderência",
+      "vaga_recomendada": "Estagiário de T.I. (Foco em Desenvolvimento)",
+      "ia_probabilidade": 25,
+      "modelo": "gemini-2.5-flash-lite"
+    }
+  },
+  {
+    "id": "56388a0a-610a-475f-8ecd-b720708060ea",
+    "criado_em": "2026-05-28T20:01:18.393281+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: JOAO DA SILVA — Alta aderência (9.0/10)",
+    "meta": {
+      "analise_id": "db212931-eddc-4151-9fa1-11b85196dfdf",
+      "candidato": "JOAO DA SILVA",
+      "arquivo": "curriculo_teste.txt",
+      "score": 9.0,
+      "classificacao": "Alta aderência",
+      "vaga_recomendada": "Estagiário de T.I. (Foco em Desenvolvimento)",
+      "ia_probabilidade": 25,
+      "modelo": "gemini-2.5-flash-lite"
+    }
+  },
+  {
+    "id": "9c9f0172-fdac-4cf6-8a7a-111d8241081f",
+    "criado_em": "2026-05-28T20:10:11.287841+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: ISAQUE VERGUEIRO — Alta aderência (8.8/10)",
+    "meta": {
+      "analise_id": "49c93bb3-abf9-4a4a-b44f-b2f99df1f955",
+      "candidato": "ISAQUE VERGUEIRO",
+      "arquivo": "CURRÍCULO - ISAQUE VERGUEIRO (1).pdf",
+      "score": 8.8,
+      "classificacao": "Alta aderência",
+      "vaga_recomendada": "Estagiário de T.I. (Foco em Desenvolvimento)",
+      "ia_probabilidade": 45,
+      "modelo": "gemini-2.5-flash-lite"
+    }
+  },
+  {
+    "id": "529d9144-3832-4d9c-84e8-1d6f0258c8bb",
+    "criado_em": "2026-05-28T20:15:09.041442+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: Rainer Vicuña Araújo Pires — Média aderência (6.8/10)",
+    "meta": {
+      "analise_id": "b795fe1d-9a77-4247-84eb-3bcfe6d1ba6a",
+      "candidato": "Rainer Vicuña Araújo Pires",
+      "arquivo": "Rainer Pires - 2026.pdf",
+      "score": 6.8,
+      "classificacao": "Média aderência",
+      "vaga_recomendada": "Encarregado TRE — Paraíba",
+      "ia_probabilidade": 45,
+      "modelo": "gemini-2.5-flash-lite"
+    }
+  },
+  {
+    "id": "faece5be-1d9b-4407-a638-4566b151f026",
+    "criado_em": "2026-05-28T20:39:49.369866+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: Analista de Compras",
+    "meta": {
+      "vaga_id": "81b84b37-fb90-4d57-9b3f-a7377c944a49",
+      "titulo": "Analista de Compras"
+    }
+  },
+  {
+    "id": "e9481205-1140-4b3e-8493-bb97a7ddda72",
+    "criado_em": "2026-05-28T20:39:49.405218+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: Coordenador de Contratos",
+    "meta": {
+      "vaga_id": "cd24a8ff-cf99-468c-982f-a4b957beead3",
+      "titulo": "Coordenador de Contratos"
+    }
+  },
+  {
+    "id": "25b16c98-f217-475a-8bfb-c60cac0dae6d",
+    "criado_em": "2026-05-28T20:39:49.437969+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: Auxiliar de Serviços Gerais (ASG)",
+    "meta": {
+      "vaga_id": "3e9923d2-d4c2-4ba4-97db-5f5e8f60caad",
+      "titulo": "Auxiliar de Serviços Gerais (ASG)"
+    }
+  },
+  {
+    "id": "e3008b8f-31c9-4624-b211-ca9ce74eb1f5",
+    "criado_em": "2026-05-28T20:39:49.500354+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: ASG Intermitente (Masculino)",
+    "meta": {
+      "vaga_id": "873ab4f4-7a12-468a-b8bd-daf9f7a93ea8",
+      "titulo": "ASG Intermitente (Masculino)"
+    }
+  },
+  {
+    "id": "09163ffc-98a9-48bd-ab96-db0a00fe4487",
+    "criado_em": "2026-05-28T20:39:49.554285+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: ASG Intermitente (Masculino) — TRE Paraíba",
+    "meta": {
+      "vaga_id": "a0927bd7-aeb9-403a-855c-e9bbd23ba83b",
+      "titulo": "ASG Intermitente (Masculino) — TRE Paraíba"
+    }
+  },
+  {
+    "id": "94d1dde7-4f88-4f8f-8932-2b6bf20130eb",
+    "criado_em": "2026-05-28T20:39:49.586981+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: Auxiliar de Estoque",
+    "meta": {
+      "vaga_id": "57b143df-5141-4e03-b71e-e14ffb3e30cc",
+      "titulo": "Auxiliar de Estoque"
+    }
+  },
+  {
+    "id": "758e56ec-c865-428a-8ff7-4176963bf926",
+    "criado_em": "2026-05-28T20:39:49.634686+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: Encarregado de ASG Intermitente",
+    "meta": {
+      "vaga_id": "144f3480-2873-4b0c-9f6b-960fd9feb43a",
+      "titulo": "Encarregado de ASG Intermitente"
+    }
+  },
+  {
+    "id": "8ab4a463-cd8a-42d1-b593-0621ee5e14eb",
+    "criado_em": "2026-05-28T20:39:49.665849+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: Encarregado TRE — Paraíba",
+    "meta": {
+      "vaga_id": "a31d18d2-0616-443c-8ad4-abda8109dfe8",
+      "titulo": "Encarregado TRE — Paraíba"
+    }
+  },
+  {
+    "id": "6a1f4752-c735-4e9f-a3e0-0fd17036a41e",
+    "criado_em": "2026-05-28T20:39:49.712981+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: Estagiário de T.I. (Foco em Desenvolvimento)",
+    "meta": {
+      "vaga_id": "23c44485-4fb9-49b2-98a9-5a7183806bae",
+      "titulo": "Estagiário de T.I. (Foco em Desenvolvimento)"
+    }
+  },
+  {
+    "id": "51e6053a-935e-4881-bacf-3674f20cc2ba",
+    "criado_em": "2026-05-28T20:39:49.744551+00:00",
+    "category": "vaga",
+    "action": "delete",
+    "level": "warn",
+    "message": "Vaga excluída: Motorista Categoria D",
+    "meta": {
+      "vaga_id": "24360ceb-3398-4517-8c41-a7274acac8bc",
+      "titulo": "Motorista Categoria D"
+    }
+  },
+  {
+    "id": "24da20fe-ed47-48d7-803a-0793bbc421b3",
+    "criado_em": "2026-05-28T20:39:49.763716+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Analista Administrativo",
+    "meta": {
+      "vaga_id": "ee3d9322-8b25-4ea7-94dc-3033a48e19d2",
+      "titulo": "Analista Administrativo"
+    }
+  },
+  {
+    "id": "e79cc982-e0ae-4de5-b129-e6d60194ac68",
+    "criado_em": "2026-05-28T20:39:49.806377+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Assistente Administrativo",
+    "meta": {
+      "vaga_id": "82de3d4b-6c1a-442f-8ab4-7702304c8640",
+      "titulo": "Assistente Administrativo"
+    }
+  },
+  {
+    "id": "e54b1dfd-6243-4687-b080-3ba39852984e",
+    "criado_em": "2026-05-28T20:39:49.870834+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Analista de Compras",
+    "meta": {
+      "vaga_id": "ef6f4522-b928-449a-81b6-66b07261f1d9",
+      "titulo": "Analista de Compras"
+    }
+  },
+  {
+    "id": "105188a2-c05d-4129-98e6-aa77faa52139",
+    "criado_em": "2026-05-28T20:39:49.920895+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Assistente de Compras",
+    "meta": {
+      "vaga_id": "7e7806dd-eb75-444e-a7f4-cb27e0740bb6",
+      "titulo": "Assistente de Compras"
+    }
+  },
+  {
+    "id": "40b1328d-6ce3-44b6-93d7-99ac4872d83e",
+    "criado_em": "2026-05-28T20:39:49.966406+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Analista de Licitação",
+    "meta": {
+      "vaga_id": "5cd23bdf-e310-4748-bd6a-45a0750bda7d",
+      "titulo": "Analista de Licitação"
+    }
+  },
+  {
+    "id": "e021eb26-85d9-44d3-9e5a-e8575c244a2c",
+    "criado_em": "2026-05-28T20:39:50.015496+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Analista de Logística",
+    "meta": {
+      "vaga_id": "28545a58-e701-4210-b4ab-2ed77c02df90",
+      "titulo": "Analista de Logística"
+    }
+  },
+  {
+    "id": "c723e524-86b5-40b1-8dae-1c50d109cf9b",
+    "criado_em": "2026-05-28T20:39:50.071077+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Analista de RH (Foco Admissão)",
+    "meta": {
+      "vaga_id": "8fada729-bc7c-45dc-b6ab-4efc3cbb43b7",
+      "titulo": "Analista de RH (Foco Admissão)"
+    }
+  },
+  {
+    "id": "07cb9914-0174-431c-8e87-c0fe47d335d1",
+    "criado_em": "2026-05-28T20:39:50.116383+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Analista Financeiro",
+    "meta": {
+      "vaga_id": "d8a501fd-e530-4bbd-9676-d5a0420b512e",
+      "titulo": "Analista Financeiro"
+    }
+  },
+  {
+    "id": "bf2d795c-715b-41dc-b7d5-befdf68f066f",
+    "criado_em": "2026-05-28T20:39:50.168913+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Assistente Financeiro",
+    "meta": {
+      "vaga_id": "a59cc602-6e6a-4fc4-a088-55001d10becc",
+      "titulo": "Assistente Financeiro"
+    }
+  },
+  {
+    "id": "35910c85-647e-4eaf-a3cf-eb2285af7729",
+    "criado_em": "2026-05-28T20:39:50.217511+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Auxiliar Financeiro",
+    "meta": {
+      "vaga_id": "52661099-a30e-4f78-b5bd-317f9ce6a5bc",
+      "titulo": "Auxiliar Financeiro"
+    }
+  },
+  {
+    "id": "acc05b1c-2c6a-4c6d-b13b-5f45804cdfcf",
+    "criado_em": "2026-05-28T20:39:50.250804+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Coordenador de Contratos",
+    "meta": {
+      "vaga_id": "dff599e9-f6c4-4c8f-a394-fb5ca95dd612",
+      "titulo": "Coordenador de Contratos"
+    }
+  },
+  {
+    "id": "1d8831a6-3730-42de-9167-a8720fe6cb6d",
+    "criado_em": "2026-05-28T20:39:50.304579+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Supervisor de Qualidade",
+    "meta": {
+      "vaga_id": "60cbd779-c8cb-4e1e-824a-375fab24c440",
+      "titulo": "Supervisor de Qualidade"
+    }
+  },
+  {
+    "id": "f10fd8f2-a752-4775-b642-13a88ecaa184",
+    "criado_em": "2026-05-28T20:39:50.355880+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Analista de SESMT",
+    "meta": {
+      "vaga_id": "c744c667-b3be-47fb-9be4-9283321079e1",
+      "titulo": "Analista de SESMT"
+    }
+  },
+  {
+    "id": "ab073ef9-4623-4501-8d2e-924f0909d3de",
+    "criado_em": "2026-05-28T20:39:50.405514+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Auxiliar de SESMT",
+    "meta": {
+      "vaga_id": "788f2eb9-709b-4434-9cb8-ddfa400a2245",
+      "titulo": "Auxiliar de SESMT"
+    }
+  },
+  {
+    "id": "dba344c4-d1f7-4aea-a3e2-38f9d058be01",
+    "criado_em": "2026-05-28T20:39:50.454294+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: TST (Técnico de Segurança do Trabalho)",
+    "meta": {
+      "vaga_id": "5b5cc6f2-ccd9-4216-89f8-92f4e8b6452f",
+      "titulo": "TST (Técnico de Segurança do Trabalho)"
+    }
+  },
+  {
+    "id": "871cf995-a154-4f74-9ed0-0c6b503621fe",
+    "criado_em": "2026-05-28T20:39:50.554655+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Psicólogo (PJ) — Saúde Ocupacional",
+    "meta": {
+      "vaga_id": "4136a0f8-0837-45d0-84b7-c9fdc90aa2df",
+      "titulo": "Psicólogo (PJ) — Saúde Ocupacional"
+    }
+  },
+  {
+    "id": "4b27cf4b-c593-435d-9bb4-8db1013b12e7",
+    "criado_em": "2026-05-28T20:39:50.597580+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Artífice de Serviços Gerais",
+    "meta": {
+      "vaga_id": "51a3650d-729b-4286-a3d2-a3f57ec8c59c",
+      "titulo": "Artífice de Serviços Gerais"
+    }
+  },
+  {
+    "id": "f4dc5864-e541-4ed6-be3d-6e8ae873ad4c",
+    "criado_em": "2026-05-28T20:39:50.654878+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Auxiliar de Serviços Gerais (ASG)",
+    "meta": {
+      "vaga_id": "4c838b48-b0ea-40bc-9cc7-f403ffaa4d5e",
+      "titulo": "Auxiliar de Serviços Gerais (ASG)"
+    }
+  },
+  {
+    "id": "6a9cb9b3-7c91-4805-8e9b-3b4cd8d1f009",
+    "criado_em": "2026-05-28T20:39:50.711212+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: ASG — Hospitalar (Manaus)",
+    "meta": {
+      "vaga_id": "acc288c0-9d46-4b3f-a90e-e86f116ed567",
+      "titulo": "ASG — Hospitalar (Manaus)"
+    }
+  },
+  {
+    "id": "f8a21cc5-a5d2-4446-8d8c-8e9981b1d7d3",
+    "criado_em": "2026-05-28T20:39:50.750451+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: ASG — Exclusiva para PCD (Manaus)",
+    "meta": {
+      "vaga_id": "f422e07d-4c23-4377-938d-167bbcbffabf",
+      "titulo": "ASG — Exclusiva para PCD (Manaus)"
+    }
+  },
+  {
+    "id": "a3282e99-c15b-4b9f-9993-1e9db5a73186",
+    "criado_em": "2026-05-28T20:39:50.810715+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: ASG Intermitente (Masculino) — Manaus",
+    "meta": {
+      "vaga_id": "369f0917-4bec-4b2b-b916-34c0a4707036",
+      "titulo": "ASG Intermitente (Masculino) — Manaus"
+    }
+  },
+  {
+    "id": "751c50c4-d144-491b-b871-a7da44d19bdc",
+    "criado_em": "2026-05-28T20:39:50.871720+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: ASG Intermitente (Masculino) — TRE Paraíba",
+    "meta": {
+      "vaga_id": "fcb081c4-c384-4b7d-8374-a67119b33b04",
+      "titulo": "ASG Intermitente (Masculino) — TRE Paraíba"
+    }
+  },
+  {
+    "id": "2d297038-a5bf-4b74-aa24-39f3061f3b0a",
+    "criado_em": "2026-05-28T20:39:50.913276+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Jardineiro — Intermitente (RS)",
+    "meta": {
+      "vaga_id": "fcb887cc-8e14-480a-8e95-2f715a43e929",
+      "titulo": "Jardineiro — Intermitente (RS)"
+    }
+  },
+  {
+    "id": "de3e2114-7a7e-42ce-8c10-47b24ed1d009",
+    "criado_em": "2026-05-28T20:39:50.967949+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Agente de Portaria",
+    "meta": {
+      "vaga_id": "cf2e7de6-523d-4538-a63b-88c5ae88d8ad",
+      "titulo": "Agente de Portaria"
+    }
+  },
+  {
+    "id": "059fdea4-50ae-4977-8867-6e6deb2cd92d",
+    "criado_em": "2026-05-28T20:39:51.013959+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Agente de Portaria / Porteiro — Manaus",
+    "meta": {
+      "vaga_id": "ec5b272d-e329-469d-99fd-8f0a3eb89e33",
+      "titulo": "Agente de Portaria / Porteiro — Manaus"
+    }
+  },
+  {
+    "id": "7ddfd069-d03d-4685-ad95-4ee6e58ebf6a",
+    "criado_em": "2026-05-28T20:39:51.059095+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Porteiro — Exclusiva para PCD",
+    "meta": {
+      "vaga_id": "9e035f45-bf26-4312-9a95-4ffcd310e564",
+      "titulo": "Porteiro — Exclusiva para PCD"
+    }
+  },
+  {
+    "id": "6adc5899-828d-410a-8e6a-284d0694425e",
+    "criado_em": "2026-05-28T20:39:51.097135+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Agente de Portaria — Intermitente (IFAM Tefé)",
+    "meta": {
+      "vaga_id": "bff44c8d-5035-45aa-be50-dd9eddb4b167",
+      "titulo": "Agente de Portaria — Intermitente (IFAM Tefé)"
+    }
+  },
+  {
+    "id": "bf9e6f5a-1a92-4326-96f3-e9c161fc95d3",
+    "criado_em": "2026-05-28T20:39:51.159683+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Encarregado — Portaria",
+    "meta": {
+      "vaga_id": "50cc9800-934b-4f1e-9fb5-d13cad9b563c",
+      "titulo": "Encarregado — Portaria"
+    }
+  },
+  {
+    "id": "e2cc3621-da30-481e-910c-1cd3b9cb4895",
+    "criado_em": "2026-05-28T20:39:51.203714+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Almoxarife",
+    "meta": {
+      "vaga_id": "c6878aa7-4da7-4533-8e12-4f6fa352df92",
+      "titulo": "Almoxarife"
+    }
+  },
+  {
+    "id": "b26866ab-a98d-4c35-87d0-4657ed2e0469",
+    "criado_em": "2026-05-28T20:39:51.250483+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Auxiliar de Almoxarifado",
+    "meta": {
+      "vaga_id": "d1905356-75da-4656-8706-7981fb1032c8",
+      "titulo": "Auxiliar de Almoxarifado"
+    }
+  },
+  {
+    "id": "a12bfc65-1cbc-46ac-9cb4-c6db48f24930",
+    "criado_em": "2026-05-28T20:39:51.298869+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Auxiliar de Almoxarifado — IFAM Tefé",
+    "meta": {
+      "vaga_id": "949c65b6-885b-4fad-afdc-457e1822300a",
+      "titulo": "Auxiliar de Almoxarifado — IFAM Tefé"
+    }
+  },
+  {
+    "id": "f7c5a83e-eca7-4275-97bc-f9c7000a6e8a",
+    "criado_em": "2026-05-28T20:39:51.344242+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Auxiliar de Almoxarifado — Intermitente (Tefé)",
+    "meta": {
+      "vaga_id": "99b8e11a-5f9c-458c-916a-9b113a564838",
+      "titulo": "Auxiliar de Almoxarifado — Intermitente (Tefé)"
+    }
+  },
+  {
+    "id": "6e28a1e0-d809-4d82-9a55-edfee351f370",
+    "criado_em": "2026-05-28T20:39:51.399103+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Auxiliar de Estoque",
+    "meta": {
+      "vaga_id": "45148374-0f37-4ccf-b38b-bb4fffc29431",
+      "titulo": "Auxiliar de Estoque"
+    }
+  },
+  {
+    "id": "8d9cdd9e-8c8b-4fa0-8fb7-69b89fcc4331",
+    "criado_em": "2026-05-28T20:39:51.436157+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Auxiliar de Estoque — Carga e Descarga",
+    "meta": {
+      "vaga_id": "fd6841bf-79ca-49a8-97fb-01130e0b3392",
+      "titulo": "Auxiliar de Estoque — Carga e Descarga"
+    }
+  },
+  {
+    "id": "fcdeae89-4e67-465c-aaa4-b1e180dbb8aa",
+    "criado_em": "2026-05-28T20:39:51.479776+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Estagiário Administrativo",
+    "meta": {
+      "vaga_id": "e26bd92b-d71a-4f95-a809-0bf0601da503",
+      "titulo": "Estagiário Administrativo"
+    }
+  },
+  {
+    "id": "0f675fa0-390e-4d81-a822-368221edf494",
+    "criado_em": "2026-05-28T20:39:51.531307+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Estagiário ADM — Operações",
+    "meta": {
+      "vaga_id": "70bcbeb4-e46b-4bbe-a9be-eda2bb0f175c",
+      "titulo": "Estagiário ADM — Operações"
+    }
+  },
+  {
+    "id": "368a8c0a-ed9b-4566-a317-940e8376f027",
+    "criado_em": "2026-05-28T20:39:51.562722+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Estagiário de DP/RH",
+    "meta": {
+      "vaga_id": "d45f760d-b1c8-42da-a265-1d2812b13fc5",
+      "titulo": "Estagiário de DP/RH"
+    }
+  },
+  {
+    "id": "9d088d13-dd1e-414f-855e-f4160dd4304e",
+    "criado_em": "2026-05-28T20:39:51.615352+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Estágio em Contabilidade",
+    "meta": {
+      "vaga_id": "2d2b4e55-9d3d-485b-b055-b9135a041fec",
+      "titulo": "Estágio em Contabilidade"
+    }
+  },
+  {
+    "id": "1bc9370e-8d36-49d6-91b5-ff2bdc0ab7ef",
+    "criado_em": "2026-05-28T20:39:51.648460+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Estágio de Direito — Ações Trabalhistas",
+    "meta": {
+      "vaga_id": "710576fe-385a-45cc-a473-2525b3b9b689",
+      "titulo": "Estágio de Direito — Ações Trabalhistas"
+    }
+  },
+  {
+    "id": "86591959-554d-4fe3-a69e-b232ce799e12",
+    "criado_em": "2026-05-28T20:39:51.699637+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Estagiário de Contrato — Direito",
+    "meta": {
+      "vaga_id": "41a031d8-48ba-4ee9-98c4-2c22334c228c",
+      "titulo": "Estagiário de Contrato — Direito"
+    }
+  },
+  {
+    "id": "3f2228c8-bcb8-4498-9784-b4eeca2f52a6",
+    "criado_em": "2026-05-28T20:39:51.756133+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Estagiário Financeiro",
+    "meta": {
+      "vaga_id": "d5b30921-6d26-4b7e-a883-80d1e1fc774a",
+      "titulo": "Estagiário Financeiro"
+    }
+  },
+  {
+    "id": "dd3b205e-c92c-4b99-8cdc-b70d40c2fc72",
+    "criado_em": "2026-05-28T20:39:51.796262+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Estágio — Área de Tecnologia",
+    "meta": {
+      "vaga_id": "7a67bba7-d78f-46a6-a600-9ca9cd7fe4bd",
+      "titulo": "Estágio — Área de Tecnologia"
+    }
+  },
+  {
+    "id": "6e3e0ae0-a297-4d82-abbe-8de74fcc204c",
+    "criado_em": "2026-05-28T20:39:51.845667+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Estagiário de T.I. (Foco em Desenvolvimento)",
+    "meta": {
+      "vaga_id": "9fa576ec-8107-4cf8-80a9-063d9189b5b0",
+      "titulo": "Estagiário de T.I. (Foco em Desenvolvimento)"
+    }
+  },
+  {
+    "id": "7c351741-402f-443c-8f8e-6f3d2ceb8242",
+    "criado_em": "2026-05-28T20:39:51.906336+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Aprendiz de Marketing",
+    "meta": {
+      "vaga_id": "8928ff8a-3a83-4757-9703-f6a02533cca9",
+      "titulo": "Aprendiz de Marketing"
+    }
+  },
+  {
+    "id": "baf2fa58-6d31-4293-bf57-ced727ede555",
+    "criado_em": "2026-05-28T20:39:51.967216+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Auxiliar de Sistemas (SGI) — Backend Python",
+    "meta": {
+      "vaga_id": "289f8534-70d3-4b15-89ae-688806d4d53f",
+      "titulo": "Auxiliar de Sistemas (SGI) — Backend Python"
+    }
+  },
+  {
+    "id": "ee4c4e9d-0863-4dc4-b2d3-4b608bbd95d9",
+    "criado_em": "2026-05-28T20:39:52.007235+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Encarregado de Serviços Gerais",
+    "meta": {
+      "vaga_id": "f178481d-b4c4-4c97-98c3-109100ffe330",
+      "titulo": "Encarregado de Serviços Gerais"
+    }
+  },
+  {
+    "id": "5428c86e-4360-4938-8a2b-1579ec3f2e08",
+    "criado_em": "2026-05-28T20:39:52.070329+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Encarregado de ASG",
+    "meta": {
+      "vaga_id": "7ee19f37-2191-4d5a-a5af-1f868fac78f5",
+      "titulo": "Encarregado de ASG"
+    }
+  },
+  {
+    "id": "dab7909e-adc7-4c4d-a215-c853a123172a",
+    "criado_em": "2026-05-28T20:39:52.142498+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Encarregado de ASG — Intermitente",
+    "meta": {
+      "vaga_id": "c4bdcde5-29bc-4a01-b7cd-025c4140081b",
+      "titulo": "Encarregado de ASG — Intermitente"
+    }
+  },
+  {
+    "id": "22199c74-1cd7-456b-99ed-43f40a6f087b",
+    "criado_em": "2026-05-28T20:39:52.221013+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Encarregado — TRE Paraíba",
+    "meta": {
+      "vaga_id": "a7f96abb-f651-492f-aad2-34267cdd38ca",
+      "titulo": "Encarregado — TRE Paraíba"
+    }
+  },
+  {
+    "id": "8dc834d9-ab09-4d5d-8d36-38e63f8a2953",
+    "criado_em": "2026-05-28T20:39:52.319831+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Encarregado — Hospital (João Pessoa)",
+    "meta": {
+      "vaga_id": "df375a9e-9bd6-41c2-8dba-cb4fde359f6b",
+      "titulo": "Encarregado — Hospital (João Pessoa)"
+    }
+  },
+  {
+    "id": "ade4ca69-8650-4679-bfc3-1eef6061a721",
+    "criado_em": "2026-05-28T20:39:52.380650+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Atendente — Hospital (João Pessoa)",
+    "meta": {
+      "vaga_id": "4b55c361-aa86-4baa-a2dc-302e81d2593c",
+      "titulo": "Atendente — Hospital (João Pessoa)"
+    }
+  },
+  {
+    "id": "f8f5a140-4073-4950-aa00-8020590280e4",
+    "criado_em": "2026-05-28T20:39:52.467874+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Maqueiro — Hospital (João Pessoa)",
+    "meta": {
+      "vaga_id": "235b88f1-f1b2-46a8-ad9d-674c44b3f391",
+      "titulo": "Maqueiro — Hospital (João Pessoa)"
+    }
+  },
+  {
+    "id": "13b9c6ea-c730-4264-a7f0-9ac9831f6ace",
+    "criado_em": "2026-05-28T20:39:52.547016+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Mensageiro / Motoboy — Hospital (João Pessoa)",
+    "meta": {
+      "vaga_id": "f5d58bac-6afd-4c16-a093-5deac10369e4",
+      "titulo": "Mensageiro / Motoboy — Hospital (João Pessoa)"
+    }
+  },
+  {
+    "id": "dce85038-2018-4bf6-b3a2-0601bf110053",
+    "criado_em": "2026-05-28T20:39:52.594155+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Motorista de Ambulância",
+    "meta": {
+      "vaga_id": "68133f0d-9f07-460b-ad8e-03c2a1ea1308",
+      "titulo": "Motorista de Ambulância"
+    }
+  },
+  {
+    "id": "b0efc5e6-9339-49c9-969c-c5816d7c6b23",
+    "criado_em": "2026-05-28T20:39:52.683895+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Recepcionista",
+    "meta": {
+      "vaga_id": "a0ed8c0d-248f-4949-8e59-da74ccf35a40",
+      "titulo": "Recepcionista"
+    }
+  },
+  {
+    "id": "7572f2a7-0875-44c1-9037-82560a0fdf6b",
+    "criado_em": "2026-05-28T20:39:52.762994+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Recepcionista — Intermitente (IFAM Tefé)",
+    "meta": {
+      "vaga_id": "43654e93-90d6-458f-ae08-7b9d9bd7eaee",
+      "titulo": "Recepcionista — Intermitente (IFAM Tefé)"
+    }
+  },
+  {
+    "id": "452e79bd-ef5f-47b9-9531-3347aeaee744",
+    "criado_em": "2026-05-28T20:39:52.894254+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Motorista (Categoria B - geral)",
+    "meta": {
+      "vaga_id": "3a544e08-b7ea-4385-a0d6-fe9890eb891f",
+      "titulo": "Motorista (Categoria B - geral)"
+    }
+  },
+  {
+    "id": "61d3b357-f704-46cb-a0f1-51c77507c505",
+    "criado_em": "2026-05-28T20:39:53.070126+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Motorista Categoria B",
+    "meta": {
+      "vaga_id": "06b40f62-6b13-4843-992f-2a74b729f737",
+      "titulo": "Motorista Categoria B"
+    }
+  },
+  {
+    "id": "f85cef43-206b-4a52-b3d5-0c491b702543",
+    "criado_em": "2026-05-28T20:39:53.216733+00:00",
+    "category": "vaga",
+    "action": "create",
+    "level": "info",
+    "message": "Vaga criada: Motorista Categoria D",
+    "meta": {
+      "vaga_id": "ffb9d114-f60a-4288-b791-dfac9e1f9438",
+      "titulo": "Motorista Categoria D"
+    }
+  },
+  {
+    "id": "184980f0-1025-45b2-99b0-024ad4db0c61",
+    "criado_em": "2026-05-28T20:44:47.585680+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: JOAO DA SILVA — Alta aderência (9.4/10)",
+    "meta": {
+      "analise_id": "6d140ee5-14e7-4e3e-a930-6684466a0e10",
+      "candidato": "JOAO DA SILVA",
+      "arquivo": "curriculo_teste.txt",
+      "score": 9.4,
+      "classificacao": "Alta aderência",
+      "vaga_recomendada": "Auxiliar de Sistemas (SGI) — Backend Python",
+      "ia_probabilidade": 40,
+      "modelo": "gemini-2.5-flash-lite"
+    }
+  },
+  {
+    "id": "2acd9a01-ed02-46ad-9472-41aebcf8dd21",
+    "criado_em": "2026-05-28T20:46:46.825861+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: Rainer Vicuña Araújo Pires — Alta aderência (10.0/10)",
+    "meta": {
+      "analise_id": "c5a640d7-a6e7-484e-9f36-43f1bc82b79e",
+      "candidato": "Rainer Vicuña Araújo Pires",
+      "arquivo": "Rainer Pires - 2026.pdf",
+      "score": 10.0,
+      "classificacao": "Alta aderência",
+      "vaga_recomendada": "Analista de RH (Foco Admissão)",
+      "ia_probabilidade": 40,
+      "modelo": "gemini-2.5-flash-lite"
+    }
+  },
+  {
+    "id": "5c9b84eb-1037-4359-82c8-997b7eaa04ae",
+    "criado_em": "2026-05-28T21:22:24.929445+00:00",
+    "category": "analise",
+    "action": "failed",
+    "level": "error",
+    "message": "Falha na análise: Curriculo_Modelo.maril (4).pdf",
+    "meta": {
+      "arquivo": "Curriculo_Modelo.maril (4).pdf",
+      "kind": "parse",
+      "mensagem": "O modelo retornou um JSON inválido. Tente novamente. Trecho recebido: \"{   \"candidato_nome\": \"Maria Eduarda Aparicio Belota\",   \"scores_por_vaga\": [     {       \"vaga_id\": \"ee3d9322-8b25-4ea7-94dc-303"
+    }
+  },
+  {
+    "id": "956890d6-02b1-4bbc-ad81-2a41fae865ec",
+    "criado_em": "2026-05-28T21:25:09.386056+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: MARIA EDUARDA APARÍCIO BELOTA — Média aderência (6.2/10)",
+    "meta": {
+      "analise_id": "0c498e4a-7284-4fda-8812-4f7a9b66fbfc",
+      "candidato": "MARIA EDUARDA APARÍCIO BELOTA",
+      "arquivo": "curriculo_maria_eduarda-0 (1).pdf",
+      "score": 6.2,
+      "classificacao": "Média aderência",
+      "vaga_recomendada": "Aprendiz de Marketing",
+      "ia_probabilidade": 20,
+      "modelo": "gemini-2.5-flash"
+    }
+  },
+  {
+    "id": "c133052d-dba7-4788-b605-dad38dabda52",
+    "criado_em": "2026-05-28T21:26:53.278722+00:00",
+    "category": "analise",
+    "action": "completed",
+    "level": "info",
+    "message": "Análise concluída: Maria Eduarda Aparicio Belota — Média aderência (6.6/10)",
+    "meta": {
+      "analise_id": "b2bc7b66-a2f2-4f62-8538-2f5e0433deec",
+      "candidato": "Maria Eduarda Aparicio Belota",
+      "arquivo": "Curriculo_Modelo.maril (4).pdf",
+      "score": 6.6,
+      "classificacao": "Média aderência",
+      "vaga_recomendada": "Estagiário Administrativo",
+      "ia_probabilidade": 40,
+      "modelo": "gemini-2.5-flash-lite"
+    }
+  },
+  {
+    "id": "4c74c6c3-4b08-434a-8747-b0782f2423e2",
+    "criado_em": "2026-05-28T21:30:00.749201+00:00",
+    "category": "analise",
+    "action": "delete",
+    "level": "warn",
+    "message": "Análise excluída: Maria Eduarda Aparicio Belota",
+    "meta": {
+      "analise_id": "b2bc7b66-a2f2-4f62-8538-2f5e0433deec",
+      "candidato": "Maria Eduarda Aparicio Belota"
+    }
+  },
+  {
+    "id": "76ac86b8-953f-486e-9165-bf99e7062749",
+    "criado_em": "2026-05-28T21:30:03.761238+00:00",
+    "category": "analise",
+    "action": "delete",
+    "level": "warn",
+    "message": "Análise excluída: MARIA EDUARDA APARÍCIO BELOTA",
+    "meta": {
+      "analise_id": "0c498e4a-7284-4fda-8812-4f7a9b66fbfc",
+      "candidato": "MARIA EDUARDA APARÍCIO BELOTA"
+    }
+  },
+  {
+    "id": "00b1611f-d740-4998-8fe4-54d80c40167b",
+    "criado_em": "2026-05-28T21:30:07.046887+00:00",
+    "category": "analise",
+    "action": "delete",
+    "level": "warn",
+    "message": "Análise excluída: Rainer Vicuña Araújo Pires",
+    "meta": {
+      "analise_id": "c5a640d7-a6e7-484e-9f36-43f1bc82b79e",
+      "candidato": "Rainer Vicuña Araújo Pires"
+    }
+  }
+]

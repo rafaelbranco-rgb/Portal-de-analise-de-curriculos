@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(uipro init --help)",
+      "PowerShell(Invoke-RestMethod -Uri \"http://127.0.0.1:5000/api/analyses\" | ConvertTo-Json -Depth 5)",
+      "PowerShell(Start-Sleep 3; \\(Invoke-RestMethod -Uri \"http://127.0.0.1:5000/api/health\" -TimeoutSec 5\\) | ConvertTo-Json; \"---\"; \\(Invoke-RestMethod -Uri \"http://127.0.0.1:5000/api/jobs\" -TimeoutSec 5\\).Count; \"vagas cadastradas\")",
+      "PowerShell(Start-Sleep 3; $a = & curl.exe -s -X POST \"http://127.0.0.1:5000/api/analyze\" -F \"curriculo=@C:\\\\Users\\\\NOTECS-29\\\\Documents\\\\pneu\\\\data\\\\curriculo_teste.txt\" --max-time 90; Start-Sleep 6; $b = & curl.exe -s -X POST \"http://127.0.0.1:5000/api/analyze\" -F \"curriculo=@C:\\\\Users\\\\NOTECS-29\\\\Documents\\\\pneu\\\\data\\\\curriculo_teste.txt\" --max-time 90; $ja = $a | ConvertFrom-Json; $jb = $b | ConvertFrom-Json; \"Run A: score=$\\($ja.resultado.score_final\\)  class=$\\($ja.resultado.classificacao\\)  ia=$\\($ja.resultado.deteccao_ia.probabilidade\\)%  vaga=$\\($ja.resultado.vaga_recomendada.titulo\\)\"; \"Run B: score=$\\($jb.resultado.score_final\\)  class=$\\($jb.resultado.classificacao\\)  ia=$\\($jb.resultado.deteccao_ia.probabilidade\\)%  vaga=$\\($jb.resultado.vaga_recomendada.titulo\\)\")",
+      "PowerShell(Start-Sleep 4; $a = & curl.exe -s -X POST \"http://127.0.0.1:5000/api/analyze\" -F \"curriculo=@C:\\\\Users\\\\NOTECS-29\\\\Documents\\\\pneu\\\\data\\\\curriculo_teste.txt\" --max-time 90; Start-Sleep 30; $b = & curl.exe -s -X POST \"http://127.0.0.1:5000/api/analyze\" -F \"curriculo=@C:\\\\Users\\\\NOTECS-29\\\\Documents\\\\pneu\\\\data\\\\curriculo_teste.txt\" --max-time 90; $ja = $a | ConvertFrom-Json; $jb = $b | ConvertFrom-Json; \"Run A: score=$\\($ja.resultado.score_final\\)  class=$\\($ja.resultado.classificacao\\)  ia=$\\($ja.resultado.deteccao_ia.probabilidade\\)%  modelo=$\\($ja.resultado._model_used\\)\"; \"Run B: score=$\\($jb.resultado.score_final\\)  class=$\\($jb.resultado.classificacao\\)  ia=$\\($jb.resultado.deteccao_ia.probabilidade\\)%  modelo=$\\($jb.resultado._model_used\\)\")",
+      "PowerShell($env:PYTHONIOENCODING=\"utf-8\"; C:\\\\Users\\\\NOTECS-29\\\\Documents\\\\pneu\\\\.venv\\\\Scripts\\\\python.exe C:\\\\Users\\\\NOTECS-29\\\\Documents\\\\pneu\\\\seed_vagas.py)"
+    ]
+  }
+}

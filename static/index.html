@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contato Facilities · Análise de Currículos</title>
+  <link rel="icon" type="image/png" href="/static/assets/logo-contato.png" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <!-- Filtros SVG para Liquid Glass -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="liquid-glass-soft" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="3" />
+        <feDisplacementMap in="SourceGraphic" scale="6" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Orbes decorativos -->
+  <div class="aurora-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="app-shell">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <img src="/static/assets/logo-contato.png" alt="Contato Facilities" />
+        </div>
+        <div class="brand-title">
+          <strong>Contato Facilities</strong>
+          <span>Análise de Currículos</span>
+        </div>
+      </div>
+      <nav class="topnav" id="topnav">
+        <button class="nav-btn active" data-target="hub">Hub</button>
+        <button class="nav-btn" data-target="analyze">Analisar</button>
+        <button class="nav-btn" data-target="jobs">Vagas</button>
+        <button class="nav-btn" data-target="history">Histórico</button>
+        <span class="nav-sep" aria-hidden="true"></span>
+        <button class="nav-btn nav-btn-icon" data-target="settings"
+                title="Opções" aria-label="Opções">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- ============================================ -->
+      <!-- HUB                                          -->
+      <!-- ============================================ -->
+      <section id="hub" class="section active">
+        <div class="hub fade-up">
+          <div class="hub-header">
+            <span class="hub-badge">Recrutamento Inteligente</span>
+            <h1 class="hub-title">Avalie currículos com precisão de IA.</h1>
+            <p class="hub-subtitle">
+              O agente lê o currículo, compara com as vagas cadastradas, calcula o
+              score ponderado pelos critérios do RH e detecta se o documento foi
+              gerado por IA.
+            </p>
+          </div>
+
+          <div class="hub-cards">
+            <button class="hub-card glass-tile glass-tile-3d fade-up fade-up-delay-1"
+                    data-target="analyze">
+              <div class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="9" y1="13" x2="15" y2="13"/>
+                  <line x1="9" y1="17" x2="13" y2="17"/>
+                </svg>
+              </div>
+              <div class="card-label">Etapa 01</div>
+              <h2 class="card-title">Analisar currículo</h2>
+              <p class="card-desc">
+                Suba um PDF, DOCX ou TXT. O agente devolve score, classificação,
+                vaga recomendada e indicadores de IA.
+              </p>
+            </button>
+
+            <button class="hub-card glass-tile glass-tile-3d gold fade-up fade-up-delay-2"
+                    data-target="jobs">
+              <div class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                </svg>
+              </div>
+              <div class="card-label">Cadastro</div>
+              <h2 class="card-title">Vagas da empresa</h2>
+              <p class="card-desc">
+                Gerencie o catálogo de vagas. O agente compara o currículo com
+                cada vaga aqui cadastrada.
+              </p>
+            </button>
+
+            <button class="hub-card glass-tile glass-tile-3d fade-up fade-up-delay-3"
+                    data-target="history">
+              <div class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div class="card-label">Registros</div>
+              <h2 class="card-title">Histórico</h2>
+              <p class="card-desc">
+                Consulte análises anteriores, escores, vagas indicadas e
+                indicadores de IA por candidato.
+              </p>
+            </button>
+
+          </div>
+
+          <div class="hub-footer">
+            Critérios: experiência (×3) · técnico (×3) · formação (×2) · soft skills (×1) · estabilidade (×1)
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- ANALYZE                                      -->
+      <!-- ============================================ -->
+      <section id="analyze" class="section">
+        <div class="page glass-strong fade-up">
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2 class="page-title">Análise de currículo</h2>
+              <p class="page-subtitle">
+                Aceita PDF, DOCX e TXT até 8 MB. O agente compara com todas as vagas cadastradas.
+              </p>
+            </div>
+            <button class="back-link" data-target="hub">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+              </svg>
+              Hub
+            </button>
+          </div>
+
+          <!-- Upload state -->
+          <div id="analyze-upload">
+            <label class="dropzone" id="dropzone">
+              <input type="file" id="file-input" accept=".pdf,.docx,.txt" hidden />
+              <div class="dropzone-inner">
+                <div class="dropzone-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <h3 class="dropzone-title">Arraste o currículo aqui ou clique para selecionar</h3>
+                <p class="dropzone-hint">PDF · DOCX · TXT — até 8 MB</p>
+              </div>
+            </label>
+
+            <div id="file-info" class="file-info-wrap" hidden>
+              <div class="file-chip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <span id="file-name">arquivo.pdf</span>
+                <button type="button" class="remove" id="file-remove" title="Remover">×</button>
+              </div>
+            </div>
+
+            <div id="analyze-error" class="inline-error" hidden>
+              <div class="icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </div>
+              <div class="content">
+                <p class="title" id="analyze-error-title">Não foi possível analisar</p>
+                <p class="message" id="analyze-error-message">—</p>
+                <span class="countdown" id="analyze-error-countdown" hidden></span>
+              </div>
+            </div>
+
+            <div class="page-actions">
+              <button class="btn btn-ghost" data-target="hub">Cancelar</button>
+              <button class="btn btn-primary" id="analyze-btn" disabled>
+                Analisar currículo
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading state -->
+          <div id="analyze-loading" hidden>
+            <div class="loader-shell">
+              <div class="loader-spinner"></div>
+              <div class="loader-text">Analisando o currículo com IA…</div>
+              <div class="loader-substep" id="loader-step">Lendo arquivo e comparando com vagas</div>
+            </div>
+          </div>
+
+          <!-- Result state -->
+          <div id="analyze-result" hidden>
+            <div class="candidate-banner">
+              <div>
+                <div class="label">Candidato</div>
+                <div class="title" id="candidate-name">—</div>
+              </div>
+              <div class="meta" id="candidate-meta">—</div>
+            </div>
+
+            <div class="result-container">
+              <!-- Score card -->
+              <div class="glass-tile score-card fade-up">
+                <div class="score-ring" id="score-ring">
+                  <div class="score-ring-inner">
+                    <div class="score-value" id="score-value">0.0</div>
+                    <div class="score-max">de 10</div>
+                  </div>
+                </div>
+                <div class="classification-badge" id="classification-badge">
+                  <span class="dot"></span>
+                  <span id="classification-text">—</span>
+                </div>
+                <div class="recommended-job" id="recommended-job">
+                  <div class="label">Vaga recomendada</div>
+                  <div class="title" id="recommended-title">—</div>
+                  <div class="reason" id="recommended-reason"></div>
+                </div>
+                <div class="final-rec">
+                  Decisão: <strong id="final-recommendation">—</strong>
+                </div>
+              </div>
+
+              <!-- Detalhes -->
+              <div class="glass result-details fade-up fade-up-delay-1">
+                <div>
+                  <h3 class="section-label">Resumo executivo</h3>
+                  <p class="exec-summary" id="exec-summary">—</p>
+                </div>
+
+                <div>
+                  <h3 class="section-label">Detecção de IA</h3>
+                  <div class="ai-detection">
+                    <div class="ai-bar-wrap">
+                      <div class="ai-meta">
+                        <span>Probabilidade de geração por IA</span>
+                        <strong id="ai-prob">0%</strong>
+                      </div>
+                      <div class="ai-bar"><div class="ai-bar-fill" id="ai-bar-fill"></div></div>
+                    </div>
+                    <div class="ai-verdict" id="ai-verdict">—</div>
+                  </div>
+                  <ul class="bullets warning" id="ai-indicators"></ul>
+                </div>
+
+                <div>
+                  <h3 class="section-label">Pontos fortes</h3>
+                  <ul class="bullets" id="strong-points"></ul>
+                </div>
+
+                <div>
+                  <h3 class="section-label">Pontos de atenção</h3>
+                  <ul class="bullets warning" id="weak-points"></ul>
+                </div>
+
+                <div>
+                  <h3 class="section-label">Score por vaga</h3>
+                  <div class="vaga-scores" id="vaga-scores"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="page-actions">
+              <button class="btn btn-ghost" id="new-analysis-btn">Analisar outro currículo</button>
+              <button class="btn btn-primary" data-target="history">Ver histórico</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- JOBS                                         -->
+      <!-- ============================================ -->
+      <section id="jobs" class="section">
+        <div class="page glass-strong fade-up">
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2 class="page-title">Vagas da empresa</h2>
+              <p class="page-subtitle">
+                O agente compara o currículo com todas as vagas cadastradas aqui.
+              </p>
+            </div>
+            <div class="page-header-actions">
+              <button class="back-link" data-target="hub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"/>
+                  <polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Hub
+              </button>
+              <button class="btn btn-gold" id="new-job-btn">+ Nova vaga</button>
+            </div>
+          </div>
+
+          <div id="jobs-grid" class="jobs-grid"></div>
+          <div id="jobs-empty" class="empty-state" hidden>
+            Nenhuma vaga cadastrada ainda. Clique em <strong>+ Nova vaga</strong> para começar.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- HISTORY                                      -->
+      <!-- ============================================ -->
+      <section id="history" class="section">
+        <div class="page glass-strong fade-up">
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2 class="page-title">Histórico de análises</h2>
+              <p class="page-subtitle">
+                Currículos já avaliados pelo agente. Clique em qualquer registro para ver o laudo completo.
+              </p>
+            </div>
+            <button class="back-link" data-target="hub">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+              </svg>
+              Hub
+            </button>
+          </div>
+
+          <div class="history-summary" id="history-summary"></div>
+          <div id="history-list" class="history-list"></div>
+          <div id="history-empty" class="empty-state" hidden>
+            Nenhuma análise registrada ainda. Vá em <strong>Analisar</strong> para começar.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- AUDIT                                        -->
+      <!-- ============================================ -->
+      <section id="audit" class="section">
+        <div class="page glass-strong fade-up">
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2 class="page-title">Auditoria</h2>
+              <p class="page-subtitle">
+                Trilha de eventos do portal: vagas, análises, falhas e erros do sistema.
+              </p>
+            </div>
+            <div class="page-header-actions">
+              <button class="back-link" data-target="hub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"/>
+                  <polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Hub
+              </button>
+              <button class="btn btn-danger" id="clear-audit-btn">Limpar trilha</button>
+            </div>
+          </div>
+
+          <div class="audit-filters" id="audit-filters">
+            <button class="filter-chip active" data-filter-cat="">Tudo</button>
+            <button class="filter-chip" data-filter-cat="vaga">Vagas</button>
+            <button class="filter-chip" data-filter-cat="analise">Análises</button>
+            <button class="filter-chip" data-filter-cat="sistema">Sistema</button>
+            <span class="filter-sep"></span>
+            <button class="filter-chip" data-filter-level="error">Só erros</button>
+            <button class="filter-chip" data-filter-level="warn">Avisos</button>
+          </div>
+
+          <div id="audit-list" class="audit-list"></div>
+          <div id="audit-empty" class="empty-state" hidden>
+            Nenhum evento registrado.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SETTINGS                                     -->
+      <!-- ============================================ -->
+      <section id="settings" class="section">
+        <div class="page glass-strong fade-up">
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2 class="page-title">Opções</h2>
+              <p class="page-subtitle">
+                Aparência, status do sistema e atalhos administrativos.
+              </p>
+            </div>
+            <button class="back-link" data-target="hub">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+              </svg>
+              Hub
+            </button>
+          </div>
+
+          <div class="settings-grid">
+            <!-- Aparência -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <div class="settings-icon blue">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="settings-card-title">Aparência</h3>
+                  <p class="settings-card-desc">Escolha entre tema escuro, claro ou seguir o sistema operacional.</p>
+                </div>
+              </div>
+              <div class="theme-toggle-wrap">
+                <div class="theme-toggle" id="theme-toggle" data-pref="dark">
+                  <span class="theme-toggle-thumb" aria-hidden="true"></span>
+                  <button class="theme-toggle-btn" data-theme="dark"
+                          aria-label="Tema escuro" title="Tema escuro">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                  </button>
+                  <button class="theme-toggle-btn" data-theme="light"
+                          aria-label="Tema claro" title="Tema claro">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="4.5"/>
+                      <line x1="12" y1="2" x2="12" y2="4"/>
+                      <line x1="12" y1="20" x2="12" y2="22"/>
+                      <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
+                      <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
+                      <line x1="2" y1="12" x2="4" y2="12"/>
+                      <line x1="20" y1="12" x2="22" y2="12"/>
+                      <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>
+                      <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
+                    </svg>
+                  </button>
+                </div>
+                <button class="theme-auto-link" id="theme-auto-link" type="button">
+                  Seguir o sistema
+                </button>
+              </div>
+            </div>
+
+            <!-- Sistema -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <div class="settings-icon gold">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="settings-card-title">Status do sistema</h3>
+                  <p class="settings-card-desc">Resumo da configuração atual e do uso da IA.</p>
+                </div>
+              </div>
+              <dl class="kv-list" id="system-status">
+                <div><dt>Gemini API</dt><dd id="status-gemini">—</dd></div>
+                <div><dt>Modelo configurado</dt><dd id="status-model">—</dd></div>
+                <div><dt>Vagas cadastradas</dt><dd id="status-jobs">—</dd></div>
+                <div><dt>Análises no histórico</dt><dd id="status-analyses">—</dd></div>
+                <div><dt>Eventos de auditoria</dt><dd id="status-events">—</dd></div>
+              </dl>
+            </div>
+
+            <!-- Administração -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <div class="settings-icon blue">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4"/>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="settings-card-title">Administração</h3>
+                  <p class="settings-card-desc">Atalhos administrativos restritos.</p>
+                </div>
+              </div>
+              <div class="settings-actions">
+                <button class="btn btn-ghost" data-target="audit">
+                  Abrir trilha de auditoria
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Dados -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <div class="settings-icon danger">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="settings-card-title">Dados</h3>
+                  <p class="settings-card-desc">Limpeza definitiva de registros. A ação não pode ser desfeita.</p>
+                </div>
+              </div>
+              <div class="settings-actions">
+                <button class="btn btn-danger" id="settings-clear-analyses">Limpar histórico</button>
+                <button class="btn btn-danger" id="settings-clear-audit">Limpar auditoria</button>
+              </div>
+            </div>
+
+            <!-- Sobre -->
+            <div class="settings-card span-full">
+              <div class="settings-card-header">
+                <div class="settings-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="settings-card-title">Sobre</h3>
+                  <p class="settings-card-desc">
+                    Portal de Análise de Currículos — Contato Facilities · v1.0
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal de vaga -->
+  <div class="modal-backdrop" id="job-modal">
+    <div class="modal glass-strong">
+      <h3 class="modal-title" id="job-modal-title">Nova vaga</h3>
+      <div class="field">
+        <label class="field-label" for="job-titulo">Título</label>
+        <input class="glass-input" id="job-titulo" type="text" placeholder="Ex.: Auxiliar de Limpeza" />
+      </div>
+      <div class="field">
+        <label class="field-label" for="job-descricao">Descrição</label>
+        <textarea class="glass-textarea" id="job-descricao"
+          placeholder="Resumo da vaga, responsabilidades, contexto da equipe…"></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label" for="job-requisitos">Requisitos (opcional)</label>
+        <textarea class="glass-textarea" id="job-requisitos"
+          placeholder="Conhecimentos técnicos obrigatórios, anos de experiência, formação…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="job-cancel-btn">Cancelar</button>
+        <button class="btn btn-primary" id="job-save-btn">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/static/js/tilt.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

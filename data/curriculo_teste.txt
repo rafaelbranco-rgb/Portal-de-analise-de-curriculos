@@ -1,0 +1,36 @@
+JOAO DA SILVA
+Desenvolvedor Backend - Python
+
+Email: joao.silva@email.com | Telefone: (11) 98888-7777
+LinkedIn: linkedin.com/in/joaosilva | GitHub: github.com/joaodev
+
+EXPERIENCIA PROFISSIONAL
+
+Empresa Acme Tech - Sao Paulo
+Desenvolvedor Backend Pleno | Jan/2023 - Atual
+- Desenvolvimento e manutencao de APIs REST em Python usando Flask e FastAPI.
+- Integracao com Postgres, Redis e filas SQS.
+- Implantacao via Docker em ambiente AWS (ECS, RDS).
+- Refatorei o servico de billing que reduziu p95 de 800ms para 220ms.
+- Cobertura de testes elevada de 32% para 78% no modulo de pagamentos.
+
+Beta Solucoes - Sao Paulo
+Desenvolvedor Backend Junior | Mar/2021 - Dez/2022
+- APIs em Django REST Framework, integracao com gateway de pagamento.
+- Migracao de monolito para microsservicos (3 servicos extraidos).
+- Pair programming e code review.
+
+FORMACAO
+Bacharelado em Ciencia da Computacao - USP - 2017-2021
+
+CONHECIMENTOS TECNICOS
+Linguagens: Python (avancado), SQL (avancado), JavaScript (intermediario)
+Frameworks: Flask, FastAPI, Django, SQLAlchemy
+Cloud: AWS (ECS, S3, RDS, SQS), Docker, GitHub Actions
+Bancos: PostgreSQL, Redis, MongoDB
+
+SOFT SKILLS
+Comunicacao com times de produto, mentoria de juniores, foco em qualidade.
+
+IDIOMAS
+Portugues nativo, Ingles avancado (B2/C1).
