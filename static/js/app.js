@@ -895,18 +895,28 @@
   // Minimiza a topbar ao rolar para baixo (volta ao normal ao subir
   // ou perto do topo da página), para não atrapalhar a leitura.
   // ---------------------------------------------------------------
-  (function setupTopbarAutoHide() {
+  (function setupTopbarMinimize() {
     const topbar = document.querySelector(".topbar");
     if (!topbar) return;
-    let lastY = window.scrollY || 0;
+    const REVEAL_AT_TOP = 90; // sempre visível perto do topo
+    const DELTA = 5; // ignora micro-rolagens
+    let lastY = -1;
     let ticking = false;
-    const REVEAL_AT_TOP = 120; // sempre visível perto do topo
-    const DELTA = 6; // ignora micro-rolagens
-    function update() {
-      const y = window.scrollY || 0;
+
+    // Lê a posição da rolagem de várias fontes (compatibilidade).
+    function getY() {
+      return (
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop ||
+        0
+      );
+    }
+    function apply() {
+      const y = getY();
       if (y < REVEAL_AT_TOP) {
         topbar.classList.remove("topbar-min");
-      } else if (y > lastY + DELTA) {
+      } else if (lastY < 0 || y > lastY + DELTA) {
         topbar.classList.add("topbar-min"); // descendo
       } else if (y < lastY - DELTA) {
         topbar.classList.remove("topbar-min"); // subindo
@@ -914,15 +924,16 @@
       lastY = y;
       ticking = false;
     }
-    window.addEventListener(
-      "scroll",
-      function () {
-        if (!ticking) {
-          window.requestAnimationFrame(update);
-          ticking = true;
-        }
-      },
-      { passive: true }
-    );
+    function onScroll() {
+      if (!ticking) {
+        ticking = true;
+        window.requestAnimationFrame(apply);
+      }
+    }
+    // capture:true capta a rolagem mesmo se ocorrer num contêiner interno
+    // (não só na window), evitando que o listener nunca dispare.
+    window.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    apply();
   })();
 })();
