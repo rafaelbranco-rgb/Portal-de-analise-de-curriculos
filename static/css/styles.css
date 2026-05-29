@@ -2126,7 +2126,6 @@ main {
   --shadow-2: 0 20px 60px rgba(20, 30, 60, 0.14);
 }
 
-:root[data-theme="light"] .brand,
 :root[data-theme="light"] .topnav {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.28)),
