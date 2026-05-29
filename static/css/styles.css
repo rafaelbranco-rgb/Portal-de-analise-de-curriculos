@@ -182,19 +182,32 @@ body::after {
   position: sticky;
   top: 14px;
   z-index: 50;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s ease;
+  will-change: transform;
+}
+
+/* Some suavemente ao rolar para baixo (não atrapalha a leitura) */
+.topbar.topbar-hidden {
+  transform: translateY(-150%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 14px;
-  /* Mesmo "liquid glass" do menu, para harmonizar */
-  background: rgba(8, 13, 26, 0.5);
-  border: 1px solid var(--glass-border);
+  /* Liquid glass translúcido, igual ao menu */
+  background: rgba(12, 18, 34, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   padding: 8px 22px 8px 8px;
   border-radius: 999px;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 30px rgba(0, 0, 0, 0.22);
 }
 
 .brand-mark {
@@ -244,12 +257,15 @@ body::after {
 .topnav {
   display: flex;
   gap: 4px;
-  background: rgba(8, 13, 26, 0.5);
-  border: 1px solid var(--glass-border);
+  background: rgba(12, 18, 34, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   padding: 5px;
   border-radius: 999px;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 30px rgba(0, 0, 0, 0.22);
   flex-wrap: wrap;
   justify-content: center;
 }

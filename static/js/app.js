@@ -890,4 +890,39 @@
   }
 
   checkHealth();
+
+  // ---------------------------------------------------------------
+  // Auto-ocultar a topbar ao rolar para baixo (revela ao subir
+  // ou perto do topo da página), para não atrapalhar a leitura.
+  // ---------------------------------------------------------------
+  (function setupTopbarAutoHide() {
+    const topbar = document.querySelector(".topbar");
+    if (!topbar) return;
+    let lastY = window.scrollY || 0;
+    let ticking = false;
+    const REVEAL_AT_TOP = 120; // sempre visível perto do topo
+    const DELTA = 6; // ignora micro-rolagens
+    function update() {
+      const y = window.scrollY || 0;
+      if (y < REVEAL_AT_TOP) {
+        topbar.classList.remove("topbar-hidden");
+      } else if (y > lastY + DELTA) {
+        topbar.classList.add("topbar-hidden"); // descendo
+      } else if (y < lastY - DELTA) {
+        topbar.classList.remove("topbar-hidden"); // subindo
+      }
+      lastY = y;
+      ticking = false;
+    }
+    window.addEventListener(
+      "scroll",
+      function () {
+        if (!ticking) {
+          window.requestAnimationFrame(update);
+          ticking = true;
+        }
+      },
+      { passive: true }
+    );
+  })();
 })();
