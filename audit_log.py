@@ -1,45 +1,29 @@
 """Log de auditoria do portal — registra criação/edição/exclusão de vagas,
-análises de currículo (sucesso e falha) e exceções inesperadas."""
+análises de currículo (sucesso e falha) e exceções inesperadas.
+
+Armazenamento em PostgreSQL. Mantém as mesmas funções públicas e formatos de
+retorno da versão antiga em JSON.
+"""
 from __future__ import annotations
 
-import json
-import threading
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any, Literal
 
-DATA_DIR = Path(__file__).parent / "data"
-AUDIT_FILE = DATA_DIR / "audit.json"
+from psycopg2.extras import Json
+
+from db import get_cursor, init_db
+
 MAX_EVENTS = 500  # mantém só os últimos N eventos para a UI
 
 EventLevel = Literal["info", "warn", "error"]
 EventCategory = Literal["vaga", "analise", "sistema"]
 
-_lock = threading.Lock()
+_COLS = "id, criado_em, category, action, level, message, meta"
 
 
-def _ensure_storage() -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    if not AUDIT_FILE.exists():
-        AUDIT_FILE.write_text("[]", encoding="utf-8")
-
-
-def _read_all() -> list[dict[str, Any]]:
-    _ensure_storage()
-    raw = AUDIT_FILE.read_text(encoding="utf-8") or "[]"
-    try:
-        data = json.loads(raw)
-        return data if isinstance(data, list) else []
-    except json.JSONDecodeError:
-        return []
-
-
-def _write_all(items: list[dict[str, Any]]) -> None:
-    _ensure_storage()
-    AUDIT_FILE.write_text(
-        json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def log(
@@ -49,21 +33,30 @@ def log(
     level: EventLevel = "info",
     meta: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    init_db()
     event = {
         "id": str(uuid.uuid4()),
-        "criado_em": datetime.now(timezone.utc).isoformat(),
+        "criado_em": _now(),
         "category": category,
         "action": action,
         "level": level,
         "message": message,
         "meta": meta or {},
     }
-    with _lock:
-        items = _read_all()
-        items.append(event)
-        if len(items) > MAX_EVENTS:
-            items = items[-MAX_EVENTS:]
-        _write_all(items)
+    with get_cursor() as cur:
+        cur.execute(
+            "INSERT INTO audit_events "
+            "(id, criado_em, category, action, level, message, meta) "
+            "VALUES (%(id)s, %(criado_em)s, %(category)s, %(action)s, "
+            "%(level)s, %(message)s, %(meta)s)",
+            {**event, "meta": Json(event["meta"])},
+        )
+        # Mantém apenas os MAX_EVENTS eventos mais recentes.
+        cur.execute(
+            "DELETE FROM audit_events WHERE id NOT IN ("
+            "SELECT id FROM audit_events ORDER BY criado_em DESC LIMIT %s)",
+            (MAX_EVENTS,),
+        )
     return event
 
 
@@ -72,19 +65,30 @@ def list_events(
     category: EventCategory | None = None,
     level: EventLevel | None = None,
 ) -> list[dict[str, Any]]:
-    with _lock:
-        items = _read_all()
+    init_db()
+    clauses: list[str] = []
+    params: list[Any] = []
     if category:
-        items = [i for i in items if i.get("category") == category]
+        clauses.append("category = %s")
+        params.append(category)
     if level:
-        items = [i for i in items if i.get("level") == level]
-    items.sort(key=lambda x: x.get("criado_em", ""), reverse=True)
-    return items[:limit]
+        clauses.append("level = %s")
+        params.append(level)
+    where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+    params.append(limit)
+    with get_cursor() as cur:
+        cur.execute(
+            f"SELECT {_COLS} FROM audit_events{where} "
+            f"ORDER BY criado_em DESC LIMIT %s",
+            params,
+        )
+        return [dict(row) for row in cur.fetchall()]
 
 
 def clear_events() -> int:
-    with _lock:
-        items = _read_all()
-        count = len(items)
-        _write_all([])
+    init_db()
+    with get_cursor() as cur:
+        cur.execute("SELECT COUNT(*) AS c FROM audit_events")
+        count = int(cur.fetchone()["c"])
+        cur.execute("DELETE FROM audit_events")
     return count

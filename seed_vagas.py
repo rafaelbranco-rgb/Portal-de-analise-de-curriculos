@@ -1,4 +1,4 @@
-"""Script único: limpa as vagas atuais e popula com TODAS as vagas reais da
+r"""Script único: limpa as vagas atuais e popula com TODAS as vagas reais da
 Contato Facilities (a partir do material recebido em VAGAS 2026 + POST DE VAGAS).
 
 Para rodar com encoding correto no Windows:
@@ -9,11 +9,19 @@ Para rodar com encoding correto no Windows:
 from __future__ import annotations
 
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
 
-BASE = "http://127.0.0.1:5000"
+# URL do portal. Use a variável de ambiente SEED_BASE_URL ou passe a URL como
+# primeiro argumento para apontar para produção. Ex.:
+#   python seed_vagas.py https://seu-app.vercel.app
+BASE = (
+    (sys.argv[1] if len(sys.argv) > 1 else None)
+    or os.environ.get("SEED_BASE_URL")
+    or "http://127.0.0.1:5000"
+).rstrip("/")
 
 
 def request(method: str, path: str, data: dict | None = None) -> dict | list:
