@@ -213,9 +213,10 @@ body::after {
   padding-right: 18px;
 }
 
-/* Logo: fica só a foto (o nome colapsa) */
+/* Logo: fica só a foto (o nome colapsa) — pílula vira um círculo limpo */
 .topbar.topbar-min .brand {
   opacity: 0.7;
+  padding: 8px;
 }
 .topbar.topbar-min .brand-title {
   max-width: 0;
@@ -280,7 +281,7 @@ body::after {
   padding: 8px 22px 8px 8px;
   border-radius: 999px;
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.45s ease;
+    opacity 0.45s ease, padding 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
   backdrop-filter: blur(24px) saturate(165%);
   -webkit-backdrop-filter: blur(24px) saturate(165%);
