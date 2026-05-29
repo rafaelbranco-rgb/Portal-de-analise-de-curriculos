@@ -213,15 +213,15 @@ body::after {
   padding-right: 18px;
 }
 
-/* Logo: fica só a foto (o nome colapsa) — pílula vira um círculo limpo */
+/* Logo: o nome desliza para dentro da foto (atrás dela) e some */
 .topbar.topbar-min .brand {
-  opacity: 0.7;
-  padding: 8px;
+  opacity: 0.85;
 }
 .topbar.topbar-min .brand-title {
   max-width: 0;
   opacity: 0;
   margin-left: -14px;
+  transform: translateX(-30px) scale(0.92);
 }
 
 /* Menu: colapsa os botões de página, mantendo só a engrenagem */
@@ -251,6 +251,7 @@ body::after {
   max-width: 240px;
   opacity: 1;
   margin-left: 0;
+  transform: none;
 }
 .topbar.topbar-min .topnav:hover {
   opacity: 1;
@@ -273,24 +274,13 @@ body::after {
   display: flex;
   align-items: center;
   gap: 14px;
-  /* Liquid glass translúcido, igual ao menu */
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02)),
-    rgba(12, 18, 34, 0.24);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 8px 22px 8px 8px;
-  border-radius: 999px;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.45s ease, padding 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
-  backdrop-filter: blur(24px) saturate(165%);
-  -webkit-backdrop-filter: blur(24px) saturate(165%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 10px 30px rgba(0, 0, 0, 0.22);
+  /* Sem pílula: só a foto da logo + o nome ao lado */
+  transition: opacity 0.45s ease;
 }
 
 .brand-mark {
+  position: relative;
+  z-index: 2; /* foto por cima, para o nome sumir atrás dela na animação */
   width: 52px;
   height: 52px;
   border-radius: 14px;
@@ -314,6 +304,8 @@ body::after {
 }
 
 .brand-title {
+  position: relative;
+  z-index: 1; /* atrás da foto da logo */
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -322,7 +314,8 @@ body::after {
   overflow: hidden;
   white-space: nowrap;
   transition: max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.3s ease, margin 0.45s ease;
+    opacity 0.3s ease, margin 0.45s ease,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .brand-title strong {
