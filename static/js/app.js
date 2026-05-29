@@ -892,7 +892,7 @@
   checkHealth();
 
   // ---------------------------------------------------------------
-  // Auto-ocultar a topbar ao rolar para baixo (revela ao subir
+  // Minimiza a topbar ao rolar para baixo (volta ao normal ao subir
   // ou perto do topo da página), para não atrapalhar a leitura.
   // ---------------------------------------------------------------
   (function setupTopbarAutoHide() {
@@ -905,11 +905,11 @@
     function update() {
       const y = window.scrollY || 0;
       if (y < REVEAL_AT_TOP) {
-        topbar.classList.remove("topbar-hidden");
+        topbar.classList.remove("topbar-min");
       } else if (y > lastY + DELTA) {
-        topbar.classList.add("topbar-hidden"); // descendo
+        topbar.classList.add("topbar-min"); // descendo
       } else if (y < lastY - DELTA) {
-        topbar.classList.remove("topbar-hidden"); // subindo
+        topbar.classList.remove("topbar-min"); // subindo
       }
       lastY = y;
       ticking = false;
