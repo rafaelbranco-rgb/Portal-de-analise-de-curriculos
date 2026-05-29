@@ -9,13 +9,19 @@ grátis).
 > O v0 é para apps React/Next gerados por IA e não faz o deploy correto deste
 > backend Flask.
 
-## 1. Criar o banco PostgreSQL grátis (Neon)
+## 1. Banco PostgreSQL
 
-1. Acesse https://neon.tech e crie uma conta (grátis).
-2. Crie um projeto / banco.
-3. Copie a **connection string** (algo como
-   `postgresql://usuario:senha@ep-xxx-pooler.region.neon.tech/neondb?sslmode=require`).
-   Prefira a string **com `-pooler`** (pooled), ideal para serverless.
+Funciona com qualquer PostgreSQL. Monte a connection string no formato:
+
+```
+postgresql://USUARIO:SENHA@HOST:PORTA/BANCO?sslmode=MODO
+```
+
+- `sslmode=require` se o servidor aceita SSL (ex.: Neon/Supabase).
+- `sslmode=disable` se o servidor **não** aceita SSL.
+
+> Servidores gerenciados como **Neon** (https://neon.tech) oferecem Postgres
+> grátis com SSL — basta copiar a connection string com `-pooler`.
 
 ## 2. Importar o projeto no Vercel
 
@@ -31,7 +37,7 @@ Em **Settings → Environment Variables**, adicione:
 |------------------|--------------------------------------------------------------|
 | `GEMINI_API_KEY` | sua chave do Google AI Studio                                |
 | `GEMINI_MODEL`   | `gemini-2.5-pro` (ou `gemini-2.5-flash`, mais rápido/barato) |
-| `DATABASE_URL`   | a connection string do Neon (passo 1)                        |
+| `DATABASE_URL`   | a connection string do Postgres (passo 1)                    |
 
 Depois faça **Redeploy** para as variáveis valerem.
 
