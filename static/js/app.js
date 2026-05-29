@@ -892,15 +892,14 @@
   checkHealth();
 
   // ---------------------------------------------------------------
-  // Minimiza a topbar ao rolar para baixo (volta ao normal ao subir
-  // ou perto do topo da página), para não atrapalhar a leitura.
+  // Minimiza a topbar quando sai do topo da página. Só volta ao normal
+  // quando a rolagem retorna ao topo — rolar um pouco para cima no meio
+  // da página NÃO restaura (evita "piscar" durante a leitura).
   // ---------------------------------------------------------------
   (function setupTopbarMinimize() {
     const topbar = document.querySelector(".topbar");
     if (!topbar) return;
-    const REVEAL_AT_TOP = 90; // sempre visível perto do topo
-    const DELTA = 5; // ignora micro-rolagens
-    let lastY = -1;
+    const REVEAL_AT_TOP = 90; // só visível quando perto do topo
     let ticking = false;
 
     // Lê a posição da rolagem de várias fontes (compatibilidade).
@@ -916,12 +915,9 @@
       const y = getY();
       if (y < REVEAL_AT_TOP) {
         topbar.classList.remove("topbar-min");
-      } else if (lastY < 0 || y > lastY + DELTA) {
-        topbar.classList.add("topbar-min"); // descendo
-      } else if (y < lastY - DELTA) {
-        topbar.classList.remove("topbar-min"); // subindo
+      } else {
+        topbar.classList.add("topbar-min");
       }
-      lastY = y;
       ticking = false;
     }
     function onScroll() {
