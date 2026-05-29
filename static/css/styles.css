@@ -187,24 +187,72 @@ body::after {
   will-change: transform;
 }
 
-/* Ao rolar para baixo: o nome da empresa some (fica só a logo) e as duas
-   pílulas deslizam para fora da tela. Voltam suavemente ao subir / topo.
-   A barra deixa de capturar cliques para não bloquear o conteúdo. */
-.topbar.topbar-min {
+/* A barra em si não captura cliques — apenas as pílulas — para nunca
+   bloquear o conteúdo embaixo dela. */
+.topbar {
   pointer-events: none;
+}
+.brand,
+.topnav {
+  pointer-events: auto;
+}
+
+/* Ao rolar para baixo, as pílulas se minimizam nos cantos (sem sair da
+   tela) e ficam discretas. Passar o mouse reabre cada uma. */
+
+/* Logo: fica só a foto (o nome colapsa) */
+.topbar.topbar-min .brand {
+  opacity: 0.7;
 }
 .topbar.topbar-min .brand-title {
   max-width: 0;
   opacity: 0;
   margin-left: -14px;
 }
-.topbar.topbar-min .brand {
-  transform: translateX(calc(-100% - 100px));
+
+/* Menu: colapsa os botões de página, mantendo só a engrenagem */
+.topbar.topbar-min .topnav {
+  opacity: 0.7;
+  gap: 0;
+}
+.topbar.topbar-min .topnav .nav-btn:not(.nav-btn-icon) {
+  max-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.topbar.topbar-min .topnav .nav-sep {
+  width: 0;
+  margin: 0;
   opacity: 0;
 }
-.topbar.topbar-min .topnav {
-  transform: translateX(calc(100% + 100px));
-  opacity: 0;
+
+/* Hover reabre a pílula correspondente */
+.topbar.topbar-min .brand:hover {
+  opacity: 1;
+}
+.topbar.topbar-min .brand:hover .brand-title {
+  max-width: 240px;
+  opacity: 1;
+  margin-left: 0;
+}
+.topbar.topbar-min .topnav:hover {
+  opacity: 1;
+  gap: 4px;
+}
+.topbar.topbar-min .topnav:hover .nav-btn:not(.nav-btn-icon) {
+  max-width: 160px;
+  padding-left: 18px;
+  padding-right: 18px;
+  opacity: 1;
+  pointer-events: auto;
+}
+.topbar.topbar-min .topnav:hover .nav-sep {
+  width: 1px;
+  margin: 0 4px;
+  opacity: 1;
 }
 
 .brand {
@@ -350,6 +398,7 @@ body::after {
   background: var(--glass-border);
   margin: 0 4px;
   align-self: center;
+  transition: width 0.3s ease, margin 0.3s ease, opacity 0.3s ease;
 }
 
 main {
