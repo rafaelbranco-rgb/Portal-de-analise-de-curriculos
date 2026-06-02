@@ -419,18 +419,111 @@
       (a, b) => (Number(b.score) || 0) - (Number(a.score) || 0)
     );
     sortedVagas.forEach((v) => {
-      const row = document.createElement("div");
-      row.className = "vaga-score-row";
-      const k = classKey(v.classificacao);
-      row.innerHTML = `
-        <div>
-          <div class="title">${escapeHTML(v.vaga_titulo || "(sem título)")}</div>
-          <div class="meta">${escapeHTML(v.classificacao || "")}</div>
-        </div>
-        <div class="score-mini ${k}">${Number(v.score || 0).toFixed(1)} / 10</div>
-      `;
-      vagaList.appendChild(row);
+      vagaList.appendChild(buildVagaRow(v));
     });
+  }
+
+  const NOTA_LABELS = {
+    experiencia: "Experiência",
+    tecnico: "Técnico",
+    formacao: "Formação",
+    soft_skills: "Soft skills",
+    estabilidade: "Estabilidade",
+  };
+
+  // Linha de score por vaga: cabeçalho clicável que expande para mostrar
+  // resumo executivo, pontos fortes, pontos de atenção e notas por critério.
+  function buildVagaRow(v) {
+    const row = document.createElement("div");
+    row.className = "vaga-score-row";
+    const k = classKey(v.classificacao);
+
+    const head = document.createElement("button");
+    head.type = "button";
+    head.className = "vaga-score-head";
+    head.setAttribute("aria-expanded", "false");
+    head.innerHTML = `
+      <div class="vaga-score-info">
+        <div class="title">${escapeHTML(v.vaga_titulo || "(sem título)")}</div>
+        <div class="meta">${escapeHTML(v.classificacao || "")}</div>
+      </div>
+      <div class="score-mini ${k}">
+        ${Number(v.score || 0).toFixed(1)} / 10
+        <svg class="chevron" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    `;
+
+    const detail = document.createElement("div");
+    detail.className = "vaga-score-detail";
+    detail.innerHTML = buildVagaDetailHTML(v);
+
+    head.addEventListener("click", () => {
+      const open = row.classList.toggle("open");
+      head.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+
+    row.appendChild(head);
+    row.appendChild(detail);
+    return row;
+  }
+
+  function buildVagaDetailHTML(v) {
+    const parts = [];
+    const resumo = v.resumo_executivo || v.resumo || "";
+    if (resumo) {
+      parts.push(`
+        <div class="vaga-detail-block">
+          <h5>Resumo executivo</h5>
+          <p>${escapeHTML(String(resumo))}</p>
+        </div>
+      `);
+    }
+    parts.push(buildVagaDetailList("Pontos fortes", v.pontos_fortes, "strong"));
+    parts.push(buildVagaDetailList("Pontos de atenção", v.pontos_atencao, "weak"));
+
+    const notas = v.notas || {};
+    const notaKeys = Object.keys(NOTA_LABELS).filter((nk) => notas[nk] != null);
+    if (notaKeys.length) {
+      const items = notaKeys
+        .map((nk) => {
+          const val = Number(notas[nk]) || 0;
+          const pct = Math.max(0, Math.min(100, (val / 10) * 100));
+          return `
+            <div class="nota-row">
+              <span class="nota-label">${NOTA_LABELS[nk]}</span>
+              <span class="nota-bar"><span style="width:${pct}%"></span></span>
+              <span class="nota-val">${val.toFixed(1)}</span>
+            </div>
+          `;
+        })
+        .join("");
+      parts.push(`
+        <div class="vaga-detail-block">
+          <h5>Notas por critério</h5>
+          <div class="nota-grid">${items}</div>
+        </div>
+      `);
+    }
+
+    const html = parts.filter(Boolean).join("");
+    return (
+      html ||
+      `<p class="vaga-detail-empty">Sem detalhes adicionais para esta vaga.</p>`
+    );
+  }
+
+  function buildVagaDetailList(title, items, variant) {
+    if (!items || !items.length) return "";
+    const lis = items.map((it) => `<li>${escapeHTML(String(it))}</li>`).join("");
+    return `
+      <div class="vaga-detail-block">
+        <h5>${title}</h5>
+        <ul class="vaga-detail-list ${variant}">${lis}</ul>
+      </div>
+    `;
   }
 
   function renderBullets(elId, items, fallback) {

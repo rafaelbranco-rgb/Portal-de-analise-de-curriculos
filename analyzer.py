@@ -37,6 +37,8 @@ um score ponderado para CADA vaga, e detecte se o currículo foi gerado por IA.
 IMPORTANTE: existem MUITAS vagas (50+). Avalie TODAS, mas seja eficiente:
 - Para vagas com BAIXA aderência (score < 4): justificativa curta (1 linha)
 - Para vagas com MÉDIA ou ALTA aderência: justificativa mais detalhada
+- Para CADA vaga preencha "resumo_executivo", "pontos_fortes" e "pontos_atencao"
+  específicos daquela vaga (1-3 itens cada); seja conciso para as de baixa aderência
 - A "vaga_recomendada" deve ser SEMPRE a de maior score real, NÃO um chute
 - Considere a LOCALIDADE da vaga vs do candidato: se vagas e CV são de cidades
   diferentes, NÃO descarte automaticamente, mas registre em pontos de atenção
@@ -104,7 +106,10 @@ Vereditos possíveis: "Provável humano" (<35), "Possível IA" (35-69), "Prováv
         "estabilidade": 0-10
       }},
       "score": 0.0-10.0,
-      "classificacao": "Alta aderência|Média aderência|Baixa aderência"
+      "classificacao": "Alta aderência|Média aderência|Baixa aderência",
+      "resumo_executivo": "2-3 linhas explicando a aderência do candidato A ESTA vaga específica",
+      "pontos_fortes": ["aspectos que favorecem o candidato NESTA vaga"],
+      "pontos_atencao": ["lacunas/riscos do candidato NESTA vaga"]
     }}
   ],
   "vaga_recomendada": {{
