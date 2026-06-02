@@ -1309,6 +1309,9 @@ main {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--glass-border);
   overflow: hidden;
+  /* Impede que o flex container (coluna com max-height) comprima as linhas
+     até colapsarem — com overflow:hidden o min-size do item flex vira 0. */
+  flex-shrink: 0;
 }
 
 .vaga-score-head {
