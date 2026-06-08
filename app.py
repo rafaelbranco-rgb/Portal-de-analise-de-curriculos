@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
+import requests
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
@@ -224,6 +227,174 @@ def analyze():
             "arquivo": uploaded.filename,
             "candidato_nome": candidato_nome,
             "tamanho_texto": len(curriculo_texto),
+        }
+    )
+
+
+# ---------------------------------------------------------------------------
+# Triagem automática (n8n / Monday)
+# ---------------------------------------------------------------------------
+# Endpoint pensado para automação: recebe um JSON simples (URL do currículo
+# anexado no Monday + metadados do formulário), baixa o arquivo, roda a mesma
+# análise do /api/analyze e devolve o `score` e `apto` já no topo da resposta,
+# para o n8n usar direto num nó "If" (score >= 7.0).
+_CONTENT_TYPE_EXT = {
+    "application/pdf": ".pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+    "text/plain": ".txt",
+}
+
+
+def _filename_from_download(url: str, resp: requests.Response) -> str:
+    """Descobre um nome de arquivo (com extensão) a partir do download."""
+    cd = resp.headers.get("Content-Disposition", "")
+    m = re.search(r'filename\*?=(?:UTF-8\'\')?"?([^";]+)', cd)
+    if m:
+        return unquote(m.group(1).strip())
+    path = urlparse(url).path
+    name = unquote(os.path.basename(path))
+    if name:
+        return name
+    ext = _CONTENT_TYPE_EXT.get(
+        (resp.headers.get("Content-Type") or "").split(";")[0].strip().lower(),
+        ".pdf",
+    )
+    return f"curriculo{ext}"
+
+
+def _ensure_supported_name(arquivo: str, resp: requests.Response) -> str:
+    """Garante uma extensão suportada (PDF/DOCX/TXT), inferindo do Content-Type."""
+    ext = Path(arquivo).suffix.lower()
+    if ext in {".pdf", ".docx", ".txt"}:
+        return arquivo
+    ctype = (resp.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+    guessed = _CONTENT_TYPE_EXT.get(ctype)
+    if guessed:
+        return arquivo + guessed
+    return arquivo
+
+
+@app.post("/api/triagem")
+@app.post("/api/analise")
+def triagem():
+    expected = os.environ.get("TRIAGEM_API_KEY", "").strip()
+    if not expected:
+        return jsonify(
+            {"error": "TRIAGEM_API_KEY não configurada no servidor.", "kind": "config"}
+        ), 500
+    provided = (request.headers.get("X-API-Key") or "").strip()
+    if provided != expected:
+        return jsonify({"error": "Não autorizado.", "kind": "auth"}), 401
+
+    payload = request.get_json(silent=True) or {}
+    file_url = (payload.get("file_url") or "").strip()
+    curriculo_texto_in = (payload.get("curriculo_texto") or "").strip()
+    candidato_nome_in = (payload.get("candidato_nome") or "").strip()
+    cargo = (payload.get("cargo_pretendido") or "").strip()
+    item_id = payload.get("item_id")
+    try:
+        threshold = float(payload.get("threshold") or 7.0)
+    except (TypeError, ValueError):
+        threshold = 7.0
+
+    arquivo = "(texto via n8n)"
+    if curriculo_texto_in:
+        curriculo_texto = curriculo_texto_in
+    elif file_url:
+        try:
+            resp = requests.get(file_url, timeout=30)
+            resp.raise_for_status()
+        except Exception as exc:  # noqa: BLE001
+            return jsonify(
+                {"error": f"Falha ao baixar o currículo: {exc}", "kind": "input"}
+            ), 400
+        raw = resp.content
+        if not raw:
+            return jsonify({"error": "Arquivo do currículo veio vazio.", "kind": "input"}), 400
+        if len(raw) > MAX_UPLOAD_SIZE:
+            return jsonify(
+                {"error": f"Currículo maior que o limite ({MAX_UPLOAD_SIZE // (1024 * 1024)} MB).",
+                 "kind": "input"}
+            ), 413
+        arquivo = _ensure_supported_name(_filename_from_download(file_url, resp), resp)
+        try:
+            curriculo_texto = extract_text(arquivo, raw)
+        except UnsupportedFileError as exc:
+            return jsonify({"error": str(exc), "kind": "input"}), 400
+        except Exception as exc:  # noqa: BLE001
+            return jsonify({"error": f"Falha ao ler o arquivo: {exc}", "kind": "input"}), 400
+    else:
+        return jsonify(
+            {"error": "Envie 'file_url' (URL do currículo) ou 'curriculo_texto'.",
+             "kind": "input"}
+        ), 400
+
+    if not curriculo_texto.strip():
+        return jsonify(
+            {"error": "Não foi possível extrair texto do currículo (PDF escaneado?).",
+             "kind": "input"}
+        ), 400
+
+    vagas = jobs_store.list_jobs()
+    if not vagas:
+        return jsonify(
+            {"error": "Nenhuma vaga cadastrada no portal.", "kind": "config"}
+        ), 400
+
+    try:
+        resultado = analisar_curriculo(curriculo_texto, vagas)
+    except AnalyzerError as exc:
+        status = 429 if exc.kind == "quota" else 502
+        out: dict[str, object] = {"error": str(exc), "kind": exc.kind}
+        if exc.retry_after is not None:
+            out["retry_after"] = exc.retry_after
+        return jsonify(out), status
+
+    candidato_nome = (
+        candidato_nome_in
+        or (resultado.get("candidato_nome") or "").strip()
+        or "(sem nome)"
+    )
+    score = round(float(resultado.get("score_final") or 0), 1)
+    apto = score >= threshold
+
+    saved = analyses_store.save_analysis(
+        arquivo=arquivo,
+        candidato_nome=candidato_nome,
+        resultado=resultado,
+        curriculo_preview=curriculo_texto,
+    )
+
+    audit_log.log(
+        "triagem",
+        "completed",
+        f"Triagem n8n: {candidato_nome} — {score:.1f}/10 — "
+        f"{'APTO' if apto else 'não apto'}",
+        meta={
+            "analise_id": saved["id"],
+            "candidato": candidato_nome,
+            "score": score,
+            "apto": apto,
+            "threshold": threshold,
+            "cargo_pretendido": cargo or None,
+            "item_id": item_id,
+            "arquivo": arquivo,
+        },
+    )
+
+    return jsonify(
+        {
+            "score": score,
+            "apto": apto,
+            "threshold": threshold,
+            "classificacao": resultado.get("classificacao"),
+            "recomendacao_final": resultado.get("recomendacao_final"),
+            "vaga_recomendada": (resultado.get("vaga_recomendada") or {}).get("titulo"),
+            "candidato_nome": candidato_nome,
+            "item_id": item_id,
+            "analise_id": saved["id"],
+            "criado_em": saved["criado_em"],
+            "resultado": resultado,
         }
     )
 
