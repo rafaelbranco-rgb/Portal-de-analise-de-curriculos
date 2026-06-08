@@ -513,6 +513,25 @@ def monday_webhook():
                           meta={"item_id": item_id})
             return jsonify({"error": str(exc)}), 502
 
+    # 5b) Aprovado -> cria a cópia no board de Captação do setor (4ª etapa).
+    #     Não derruba a triagem se a cópia falhar (a etiqueta já foi gravada).
+    captacao = None
+    if apto:
+        try:
+            captacao = monday_client.enviar_para_captacao(
+                ctx, score=score, classificacao=resultado.get("classificacao")
+            )
+        except Exception as exc:  # noqa: BLE001
+            captacao = {"copiado": False, "motivo": f"erro inesperado: {exc}"}
+        audit_log.log(
+            "triagem",
+            "captacao" if (captacao or {}).get("copiado") else "captacao_skip",
+            f"Captação ({ctx.get('departamento') or 'sem setor'}): "
+            f"{'copiado' if (captacao or {}).get('copiado') else (captacao or {}).get('motivo')}",
+            level="info" if (captacao or {}).get("copiado") else "warn",
+            meta={"item_id": ctx["item_id"], "candidato": candidato_nome, **(captacao or {})},
+        )
+
     saved = analyses_store.save_analysis(
         arquivo=arquivo, candidato_nome=candidato_nome,
         resultado=resultado, curriculo_preview=curriculo_texto,
@@ -528,7 +547,7 @@ def monday_webhook():
     return jsonify({
         "ok": True, "candidato_nome": candidato_nome, "score": score,
         "apto": apto, "status_aplicado": novo_status if (apto or reprovar) else None,
-        "analise_id": saved["id"],
+        "analise_id": saved["id"], "captacao": captacao,
     })
 
 
