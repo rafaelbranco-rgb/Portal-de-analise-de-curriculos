@@ -14,6 +14,7 @@ from flask_cors import CORS
 import analyses_store
 import audit_log
 import jobs_store
+import monday_client
 from analyzer import AnalyzerError, analisar_curriculo
 from extractor import UnsupportedFileError, extract_text
 
@@ -397,6 +398,138 @@ def triagem():
             "resultado": resultado,
         }
     )
+
+
+# ---------------------------------------------------------------------------
+# Triagem automática DIRETA do Monday (sem n8n)
+# ---------------------------------------------------------------------------
+# O Monday (Integrar → Webhook) chama esta rota quando um currículo é cadastrado.
+# O portal lê o CV anexado, analisa e escreve a etiqueta de avaliação de volta:
+#   score >= TRIAGEM_THRESHOLD  → APROV.ENTREVISTA
+#   score <  TRIAGEM_THRESHOLD  → REPROV.TRIAGEM  (se TRIAGEM_REPROVAR=1)
+def _download_and_extract(file_url: str) -> tuple[str, str]:
+    """Baixa o arquivo da URL e devolve (nome_arquivo, texto_extraído)."""
+    resp = requests.get(file_url, timeout=30)
+    resp.raise_for_status()
+    raw = resp.content
+    if not raw:
+        raise UnsupportedFileError("Arquivo do currículo veio vazio.")
+    if len(raw) > MAX_UPLOAD_SIZE:
+        raise UnsupportedFileError(
+            f"Currículo maior que o limite ({MAX_UPLOAD_SIZE // (1024 * 1024)} MB)."
+        )
+    arquivo = _ensure_supported_name(_filename_from_download(file_url, resp), resp)
+    return arquivo, extract_text(arquivo, raw)
+
+
+@app.post("/api/monday-webhook")
+def monday_webhook():
+    payload = request.get_json(silent=True) or {}
+
+    # 1) Handshake do Monday: ecoa o "challenge" na configuração do webhook.
+    if "challenge" in payload:
+        return jsonify({"challenge": payload["challenge"]})
+
+    # 2) Autenticação por token na query string (?token=...), pois o webhook
+    #    nativo do Monday não envia headers customizados.
+    expected = os.environ.get("MONDAY_WEBHOOK_TOKEN", "").strip()
+    if expected and (request.args.get("token") or "").strip() != expected:
+        return jsonify({"error": "Não autorizado."}), 401
+
+    event = payload.get("event") or {}
+    item_id = event.get("pulseId") or event.get("itemId")
+    if not item_id:
+        return jsonify({"ok": True, "ignored": "sem pulseId no evento"}), 200
+
+    label_aprov = os.environ.get("TRIAGEM_LABEL_APROVADO", "APROV.ENTREVISTA").strip()
+    label_reprov = os.environ.get("TRIAGEM_LABEL_REPROVADO", "REPROV.TRIAGEM").strip()
+    reprovar = os.environ.get("TRIAGEM_REPROVAR", "1").strip() not in ("0", "false", "")
+    try:
+        threshold = float(os.environ.get("TRIAGEM_THRESHOLD", "7.0"))
+    except ValueError:
+        threshold = 7.0
+
+    try:
+        ctx = monday_client.get_item_context(item_id)
+    except monday_client.MondayError as exc:
+        audit_log.log("triagem", "failed", f"Monday: {exc}", level="error",
+                      meta={"item_id": item_id})
+        return jsonify({"error": str(exc)}), 502
+
+    # 3) Idempotência: se já tem etiqueta final, ignora reenvios do webhook.
+    if ctx["status_atual"] in (label_aprov, label_reprov):
+        return jsonify({"ok": True, "skipped": "já triado", "status": ctx["status_atual"]}), 200
+
+    if not ctx.get("cv_url"):
+        audit_log.log("triagem", "rejected",
+                      f"Sem currículo anexado: {ctx.get('name')}", level="warn",
+                      meta={"item_id": item_id})
+        return jsonify({"ok": True, "ignored": "sem currículo anexado"}), 200
+
+    # 4) Baixa + extrai + analisa.
+    try:
+        arquivo, curriculo_texto = _download_and_extract(ctx["cv_url"])
+    except Exception as exc:  # noqa: BLE001
+        audit_log.log("triagem", "extract_failed", f"Falha ao ler CV: {exc}",
+                      level="error", meta={"item_id": item_id})
+        return jsonify({"error": f"Falha ao ler o currículo: {exc}"}), 400
+
+    if not curriculo_texto.strip():
+        audit_log.log("triagem", "rejected",
+                      "CV sem texto extraível (PDF escaneado?)", level="warn",
+                      meta={"item_id": item_id})
+        return jsonify({"ok": True, "ignored": "sem texto extraível"}), 200
+
+    vagas = jobs_store.list_jobs()
+    if not vagas:
+        return jsonify({"error": "Nenhuma vaga cadastrada no portal."}), 400
+
+    try:
+        resultado = analisar_curriculo(curriculo_texto, vagas)
+    except AnalyzerError as exc:
+        status = 429 if exc.kind == "quota" else 502
+        audit_log.log("triagem", "failed", f"Falha na análise: {exc}", level="error",
+                      meta={"item_id": item_id, "kind": exc.kind})
+        return jsonify({"error": str(exc), "kind": exc.kind}), status
+
+    candidato_nome = (
+        (resultado.get("candidato_nome") or "").strip()
+        or ctx.get("name")
+        or "(sem nome)"
+    )
+    score = round(float(resultado.get("score_final") or 0), 1)
+    apto = score >= threshold
+
+    # 5) Escreve a etiqueta de volta no Monday.
+    novo_status = label_aprov if apto else label_reprov
+    if apto or reprovar:
+        try:
+            monday_client.set_status(
+                ctx["board_id"], ctx["item_id"], ctx["status_column_id"], novo_status
+            )
+        except monday_client.MondayError as exc:
+            audit_log.log("triagem", "failed",
+                          f"Falha ao atualizar etiqueta: {exc}", level="error",
+                          meta={"item_id": item_id})
+            return jsonify({"error": str(exc)}), 502
+
+    saved = analyses_store.save_analysis(
+        arquivo=arquivo, candidato_nome=candidato_nome,
+        resultado=resultado, curriculo_preview=curriculo_texto,
+    )
+    audit_log.log(
+        "triagem", "completed",
+        f"Triagem Monday: {candidato_nome} — {score:.1f}/10 — {novo_status}",
+        meta={"analise_id": saved["id"], "candidato": candidato_nome, "score": score,
+              "apto": apto, "threshold": threshold, "item_id": ctx["item_id"],
+              "status_aplicado": novo_status if (apto or reprovar) else ctx["status_atual"]},
+    )
+
+    return jsonify({
+        "ok": True, "candidato_nome": candidato_nome, "score": score,
+        "apto": apto, "status_aplicado": novo_status if (apto or reprovar) else None,
+        "analise_id": saved["id"],
+    })
 
 
 # ---------------------------------------------------------------------------
