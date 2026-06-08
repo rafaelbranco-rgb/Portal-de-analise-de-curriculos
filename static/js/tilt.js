@@ -4,13 +4,27 @@
 (function () {
   "use strict";
 
+  // Respeita quem prefere menos movimento (acessibilidade + performance).
+  const reduceMotion = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let frame = 0;
+
   function handleMove(e) {
+    if (reduceMotion) return;
     const el = e.currentTarget;
-    const r = el.getBoundingClientRect();
-    const mx = ((e.clientX - r.left) / r.width) * 100;
-    const my = ((e.clientY - r.top) / r.height) * 100;
-    el.style.setProperty("--mx", String(mx));
-    el.style.setProperty("--my", String(my));
+    const cx = e.clientX;
+    const cy = e.clientY;
+    // Agrupa as leituras/escritas num único frame para evitar layout thrashing.
+    if (frame) cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(function () {
+      frame = 0;
+      const r = el.getBoundingClientRect();
+      const mx = ((cx - r.left) / r.width) * 100;
+      const my = ((cy - r.top) / r.height) * 100;
+      el.style.setProperty("--mx", String(mx));
+      el.style.setProperty("--my", String(my));
+    });
   }
 
   function handleLeave(e) {
