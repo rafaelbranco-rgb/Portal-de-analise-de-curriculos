@@ -69,7 +69,7 @@ def get_item_context(item_id: str | int) -> dict[str, Any]:
     URL pública (temporária) do currículo anexado."""
     data = _gql(
         """
-        query ($ids: [ID!]) {
+        query ($ids: [ID!]!) {
           items (ids: $ids) {
             id
             name
@@ -114,7 +114,7 @@ def get_item_context(item_id: str | int) -> dict[str, Any]:
     cv_name = None
     if asset_ids:
         assets = _gql(
-            "query ($aids: [ID!]) { assets (ids: $aids) { id name public_url } }",
+            "query ($aids: [ID!]!) { assets (ids: $aids) { id name public_url } }",
             {"aids": asset_ids},
         ).get("assets") or []
         if assets:
