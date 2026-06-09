@@ -1331,6 +1331,13 @@ main {
   letter-spacing: 0.06em;
   opacity: 0.7;
 }
+.pcd-hint {
+  margin: 2px 0 6px;
+  font-size: 11px;
+  line-height: 1.45;
+  opacity: 0.6;
+  font-style: italic;
+}
 .pcd-disclaimer {
   margin: 12px 0 0;
   font-size: 11px;

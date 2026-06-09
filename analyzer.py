@@ -135,6 +135,7 @@ Vereditos possíveis: "Provável humano" (<35), "Possível IA" (35-69), "Prováv
     "titulo": "rótulo curto e formal do indicador (ex.: 'Sem interferência prevista')",
     "parecer": "parecer formal, técnico e respeitoso (2-4 linhas) sobre a compatibilidade entre a condição declarada e as ATRIBUIÇÕES da vaga recomendada",
     "condicao_declarada": "resumo da especificação/laudo, ou 'Não informado'",
+    "pontos_atencao": ["barreira/condição do ambiente ou da função que merece atenção para garantir um trabalho seguro e produtivo — NUNCA um defeito da pessoa"],
     "adaptacoes_sugeridas": ["adaptação razoável 1", "..."],
     "fundamentacao": "em que se baseou (laudo/especificação x demandas da função)"
   }}
@@ -157,6 +158,16 @@ REGRAS INEGOCIÁVEIS:
   deficiência. Isso é discriminação e é vedado.
 - Raciocine em termos de ADAPTAÇÕES RAZOÁVEIS e acessibilidade, jamais de
   "incapacidade" do candidato. Linguagem formal, técnica e respeitosa.
+
+PONTOS DE ATENÇÃO (campo `pontos_atencao`) — REGRAS DE ENQUADRAMENTO:
+- Liste pontos que o RH deve observar para que a pessoa trabalhe com segurança e
+  produtividade. Enquadre SEMPRE como BARREIRA DO AMBIENTE/DA FUNÇÃO a resolver,
+  nunca como falha, fraqueza ou "desvantagem" da pessoa.
+- Errado: "candidato não consegue X". Certo: "a função exige X em escadas sem
+  acesso adaptado; avaliar adequação do posto".
+- Vincule cada ponto, quando possível, a uma adaptação em `adaptacoes_sugeridas`.
+- Se não houver pontos relevantes, devolva lista vazia. NÃO invente desvantagens
+  para preencher.
 
 Classifique `indicador` assim:
 - "sem_interferencia": a condição não impacta as atribuições essenciais da função.

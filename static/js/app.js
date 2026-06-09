@@ -462,6 +462,15 @@
       cond.hidden = true;
     }
 
+    const atencao = pcd.pontos_atencao || [];
+    const atWrap = document.getElementById("pcd-atencao-wrap");
+    if (atencao.length) {
+      atWrap.hidden = false;
+      renderBullets("pcd-atencao", atencao, "");
+    } else {
+      atWrap.hidden = true;
+    }
+
     const adapt = pcd.adaptacoes_sugeridas || [];
     const wrap = document.getElementById("pcd-adaptacoes-wrap");
     if (adapt.length) {
