@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contato Facilities · Análise de Currículos</title>
   <link rel="icon" type="image/png" href="/static/assets/logo-contato.png" />
-  <link rel="stylesheet" href="/static/css/styles.css?v=20260609-2" />
+  <link rel="stylesheet" href="/static/css/styles.css?v=20260609-3" />
 </head>
 <body>
   <!-- Orbes decorativos -->
@@ -270,8 +270,15 @@
 
                 <!-- Indicador de PCD (consultivo) — só aparece quando o
                      formulário do Monday trouxe condição declarada. -->
-                <div id="pcd-block" hidden>
-                  <h3 class="section-label">Acessibilidade / PCD</h3>
+                <div id="pcd-block" class="pcd-collapsible open" hidden>
+                  <button type="button" class="pcd-toggle" id="pcd-toggle"
+                          aria-expanded="true" aria-controls="pcd-indicator">
+                    <h3 class="section-label">Acessibilidade / PCD</h3>
+                    <svg class="chevron" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                      <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
                   <div class="pcd-indicator" id="pcd-indicator">
                     <div class="pcd-head">
                       <span class="pcd-dot"></span>
@@ -641,7 +648,7 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <script src="/static/js/tilt.js?v=20260609-2"></script>
-  <script src="/static/js/app.js?v=20260609-2"></script>
+  <script src="/static/js/tilt.js?v=20260609-3"></script>
+  <script src="/static/js/app.js?v=20260609-3"></script>
 </body>
 </html>

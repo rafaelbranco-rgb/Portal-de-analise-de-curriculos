@@ -1284,7 +1284,35 @@ main {
   border: 1px solid rgba(239, 106, 106, 0.3);
 }
 
-/* Indicador de PCD (consultivo) */
+/* Indicador de PCD (consultivo) — seção recolhível */
+.pcd-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0 0 8px;
+  cursor: pointer;
+  color: inherit;
+}
+.pcd-toggle .section-label {
+  margin: 0;
+}
+.pcd-toggle .chevron {
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+.pcd-collapsible:not(.open) .pcd-toggle .chevron {
+  transform: rotate(-90deg);
+}
+.pcd-collapsible:not(.open) .pcd-indicator {
+  display: none;
+}
+
 .pcd-indicator {
   border: 1px solid var(--accent-line, rgba(255, 255, 255, 0.12));
   border-left-width: 4px;

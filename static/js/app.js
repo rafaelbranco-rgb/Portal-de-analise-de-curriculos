@@ -835,6 +835,16 @@
     });
   }
 
+  // Recolher/expandir a seção de Acessibilidade / PCD.
+  const pcdToggle = document.getElementById("pcd-toggle");
+  if (pcdToggle) {
+    pcdToggle.addEventListener("click", () => {
+      const block = document.getElementById("pcd-block");
+      const open = block.classList.toggle("open");
+      pcdToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
   if (historyFilters) {
     historyFilters.addEventListener("click", (e) => {
       const chip = e.target.closest("[data-pcd-filter]");
