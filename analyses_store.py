@@ -32,6 +32,7 @@ def list_analyses() -> list[dict[str, Any]]:
     summaries: list[dict[str, Any]] = []
     for item in rows:
         resultado = item.get("resultado") or {}
+        pcd = resultado.get("analise_pcd") or {}
         summaries.append(
             {
                 "id": item["id"],
@@ -47,6 +48,12 @@ def list_analyses() -> list[dict[str, Any]]:
                 "deteccao_ia_prob": (resultado.get("deteccao_ia") or {}).get(
                     "probabilidade"
                 ),
+                # Resumo PCD para o filtro do histórico (sem expor a condição/CID).
+                "pcd": {
+                    "is_pcd": bool(pcd.get("is_pcd")),
+                    "indicador": pcd.get("indicador"),
+                    "titulo": pcd.get("titulo"),
+                },
             }
         )
     return summaries

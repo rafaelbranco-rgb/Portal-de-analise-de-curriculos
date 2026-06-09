@@ -422,6 +422,40 @@ def _download_and_extract(file_url: str) -> tuple[str, str]:
     return arquivo, extract_text(arquivo, raw)
 
 
+# Rótulos da coluna PCD que significam "não é PCD / não declarado".
+_PCD_NEGATIVOS = {"", "nao", "não", "nao identificado", "não identificado",
+                  "nao informado", "não informado", "n/a", "na", "-"}
+
+
+def _build_pcd_context(ctx: dict[str, object]) -> dict[str, object] | None:
+    """Monta o contexto de PCD para a análise (consultivo).
+
+    Retorna None quando não há nenhum sinal de PCD. Caso haja, baixa e extrai o
+    texto do Laudo Atualizado (best-effort) para enriquecer o parecer.
+    """
+    pcd_raw = (ctx.get("pcd") or "").strip()
+    espec = (ctx.get("pcd_especificacao") or "").strip()
+    laudo_url = ctx.get("laudo_url")
+
+    pcd_norm = pcd_raw.lower().strip()
+    declarou_pcd = bool(pcd_raw) and pcd_norm not in _PCD_NEGATIVOS
+    if not (declarou_pcd or espec or laudo_url):
+        return None
+
+    laudo_texto = ""
+    if laudo_url:
+        try:
+            _laudo_nome, laudo_texto = _download_and_extract(laudo_url)
+        except Exception:  # noqa: BLE001 — laudo ilegível não pode quebrar a triagem
+            laudo_texto = ""
+
+    return {
+        "pcd": pcd_raw or "Não informado",
+        "especificacao": espec or "Não informado",
+        "laudo_texto": laudo_texto,
+    }
+
+
 @app.post("/api/monday-webhook")
 def monday_webhook():
     payload = request.get_json(silent=True) or {}
@@ -484,8 +518,14 @@ def monday_webhook():
     if not vagas:
         return jsonify({"error": "Nenhuma vaga cadastrada no portal."}), 400
 
+    # 4b) Contexto de PCD (consultivo): só monta se houver sinal de PCD —
+    #     etiqueta PCD afirmativa, especificação preenchida ou laudo anexado.
+    #     O laudo é baixado e lido para um parecer mais preciso; falha de leitura
+    #     não interrompe a triagem (segue com o que houver).
+    pcd_context = _build_pcd_context(ctx)
+
     try:
-        resultado = analisar_curriculo(curriculo_texto, vagas)
+        resultado = analisar_curriculo(curriculo_texto, vagas, pcd_context=pcd_context)
     except AnalyzerError as exc:
         status = 429 if exc.kind == "quota" else 502
         audit_log.log("triagem", "failed", f"Falha na análise: {exc}", level="error",
@@ -541,7 +581,8 @@ def monday_webhook():
         f"Triagem Monday: {candidato_nome} — {score:.1f}/10 — {novo_status}",
         meta={"analise_id": saved["id"], "candidato": candidato_nome, "score": score,
               "apto": apto, "threshold": threshold, "item_id": ctx["item_id"],
-              "status_aplicado": novo_status if (apto or reprovar) else ctx["status_atual"]},
+              "status_aplicado": novo_status if (apto or reprovar) else ctx["status_atual"],
+              "pcd_indicador": (resultado.get("analise_pcd") or {}).get("indicador")},
     )
 
     return jsonify({

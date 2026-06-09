@@ -50,7 +50,7 @@ IMPORTANTE: existem MUITAS vagas (50+). Avalie TODAS, mas seja eficiente:
 \"\"\"
 {curriculo_texto}
 \"\"\"
-
+{pcd_block}
 ## CRITÉRIOS DE AVALIAÇÃO (notas de 0 a 10, com pesos)
 - Experiência relevante na função (peso 3)
 - Conhecimentos técnicos obrigatórios (peso 3)
@@ -128,10 +128,71 @@ Vereditos possíveis: "Provável humano" (<35), "Possível IA" (35-69), "Prováv
     "probabilidade": 0-100,
     "veredito": "Provável humano|Possível IA|Provável IA",
     "indicadores": ["item 1", "item 2", "..."]
+  }},
+  "analise_pcd": {{
+    "is_pcd": true|false,
+    "indicador": "sem_interferencia|compativel_com_adaptacoes|requer_avaliacao_ocupacional|nao_informado",
+    "titulo": "rótulo curto e formal do indicador (ex.: 'Sem interferência prevista')",
+    "parecer": "parecer formal, técnico e respeitoso (2-4 linhas) sobre a compatibilidade entre a condição declarada e as ATRIBUIÇÕES da vaga recomendada",
+    "condicao_declarada": "resumo da especificação/laudo, ou 'Não informado'",
+    "adaptacoes_sugeridas": ["adaptação razoável 1", "..."],
+    "fundamentacao": "em que se baseou (laudo/especificação x demandas da função)"
   }}
 }}
 
 Responda APENAS com o JSON. Sem markdown, sem comentário."""
+
+
+PCD_BLOCK_TEMPLATE = """
+## ANÁLISE DE PCD (Pessoa com Deficiência) — OBRIGATÓRIA E CONSULTIVA
+O candidato declarou condição de PCD. Avalie a COMPATIBILIDADE entre a condição
+e as ATRIBUIÇÕES da vaga recomendada, à luz da Lei Brasileira de Inclusão
+(Lei 13.146/2015) e da Lei de Cotas (Lei 8.213/91).
+
+REGRAS INEGOCIÁVEIS:
+- Esta análise é CONSULTIVA. Ela NÃO pode alterar `score_final`, `scores_por_vaga`,
+  `classificacao` nem `recomendacao_final`. Avalie o mérito profissional EXATAMENTE
+  como faria com qualquer candidato — a condição PCD não soma nem subtrai pontos.
+- NUNCA recomende reprovar, desclassificar ou rebaixar o candidato por causa da
+  deficiência. Isso é discriminação e é vedado.
+- Raciocine em termos de ADAPTAÇÕES RAZOÁVEIS e acessibilidade, jamais de
+  "incapacidade" do candidato. Linguagem formal, técnica e respeitosa.
+
+Classifique `indicador` assim:
+- "sem_interferencia": a condição não impacta as atribuições essenciais da função.
+- "compativel_com_adaptacoes": a função é exercível com adaptações razoáveis —
+  liste-as em `adaptacoes_sugeridas`.
+- "requer_avaliacao_ocupacional": há, no laudo, restrição potencialmente relevante
+  às demandas físicas/ambientais da função; encaminhar ao SESMT / medicina
+  ocupacional antes de qualquer decisão. (Isto NÃO é reprovação.)
+
+DADOS DECLARADOS NO FORMULÁRIO:
+- PCD: {pcd}
+- Especificação: {especificacao}
+- Laudo atualizado (texto extraído, pode estar vazio ou parcial):
+\"\"\"
+{laudo}
+\"\"\"
+"""
+
+
+def _build_pcd_block(pcd_context: dict[str, Any] | None) -> str:
+    """Monta o trecho de PCD do prompt; vazio quando não há contexto de PCD."""
+    if not pcd_context:
+        return (
+            "\n## ANÁLISE DE PCD\n"
+            "Não há informação de PCD para este candidato. No JSON, preencha "
+            '`analise_pcd` com {"is_pcd": false, "indicador": "nao_informado", '
+            '"titulo": "Não informado", "parecer": "Não informado", '
+            '"condicao_declarada": "Não informado", "adaptacoes_sugeridas": [], '
+            '"fundamentacao": ""}.\n'
+        )
+    laudo = (pcd_context.get("laudo_texto") or "").strip()
+    return PCD_BLOCK_TEMPLATE.format(
+        pcd=pcd_context.get("pcd") or "Não informado",
+        especificacao=pcd_context.get("especificacao") or "Não informado",
+        laudo=(laudo[:12000] if laudo else "(laudo não anexado ou ilegível)"),
+    )
 
 
 # Modelos a tentar em ordem: o configurado pelo usuário e fallbacks com cotas
@@ -221,7 +282,9 @@ def _call_model(model_name: str, prompt: str) -> str:
 
 
 def analisar_curriculo(
-    curriculo_texto: str, vagas: list[dict[str, Any]]
+    curriculo_texto: str,
+    vagas: list[dict[str, Any]],
+    pcd_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if not curriculo_texto.strip():
         raise AnalyzerError("O currículo está vazio ou ilegível.", kind="input")
@@ -230,6 +293,7 @@ def analisar_curriculo(
     prompt = PROMPT_TEMPLATE.format(
         vagas_block=_format_vagas(vagas),
         curriculo_texto=curriculo_texto[:30000],
+        pcd_block=_build_pcd_block(pcd_context),
     )
 
     last_quota_retry: float | None = None

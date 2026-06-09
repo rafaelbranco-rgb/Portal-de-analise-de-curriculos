@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contato Facilities · Análise de Currículos</title>
   <link rel="icon" type="image/png" href="/static/assets/logo-contato.png" />
-  <link rel="stylesheet" href="/static/css/styles.css?v=20260608-1" />
+  <link rel="stylesheet" href="/static/css/styles.css?v=20260609-1" />
 </head>
 <body>
   <!-- Orbes decorativos -->
@@ -268,6 +268,29 @@
                   <ul class="bullets warning" id="ai-indicators"></ul>
                 </div>
 
+                <!-- Indicador de PCD (consultivo) — só aparece quando o
+                     formulário do Monday trouxe condição declarada. -->
+                <div id="pcd-block" hidden>
+                  <h3 class="section-label">Acessibilidade / PCD</h3>
+                  <div class="pcd-indicator" id="pcd-indicator">
+                    <div class="pcd-head">
+                      <span class="pcd-dot"></span>
+                      <strong id="pcd-titulo">—</strong>
+                    </div>
+                    <p class="pcd-parecer" id="pcd-parecer">—</p>
+                    <div class="pcd-condicao" id="pcd-condicao"></div>
+                    <div id="pcd-adaptacoes-wrap" hidden>
+                      <span class="pcd-sublabel">Adaptações sugeridas</span>
+                      <ul class="bullets" id="pcd-adaptacoes"></ul>
+                    </div>
+                    <p class="pcd-disclaimer">
+                      Parecer consultivo, em conformidade com a LBI (Lei 13.146/2015)
+                      e a Lei de Cotas (Lei 8.213/91). Não altera o score de aderência
+                      nem substitui avaliação ocupacional.
+                    </p>
+                  </div>
+                </div>
+
                 <div>
                   <h3 class="section-label">Pontos fortes</h3>
                   <ul class="bullets" id="strong-points"></ul>
@@ -348,9 +371,28 @@
           </div>
 
           <div class="history-summary" id="history-summary"></div>
+
+          <div class="history-filters" id="history-filters">
+            <button class="filter-chip active" data-pcd-filter="all">Todos</button>
+            <button class="filter-chip" data-pcd-filter="pcd">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="4" r="2"/>
+                <path d="M19 13h-6V6"/>
+                <path d="M13 9.5l5 1.5"/>
+                <path d="M9 8.5l1.5 6.5h4l3 5"/>
+                <circle cx="9" cy="18" r="3.5"/>
+              </svg>
+              Pessoas com deficiência
+            </button>
+          </div>
+
           <div id="history-list" class="history-list"></div>
           <div id="history-empty" class="empty-state" hidden>
             Nenhuma análise registrada ainda. Vá em <strong>Analisar</strong> para começar.
+          </div>
+          <div id="history-filter-empty" class="empty-state" hidden>
+            Nenhuma análise de pessoa com deficiência registrada até o momento.
           </div>
         </div>
       </section>
@@ -594,7 +636,7 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <script src="/static/js/tilt.js?v=20260608-1"></script>
-  <script src="/static/js/app.js?v=20260608-1"></script>
+  <script src="/static/js/tilt.js?v=20260609-1"></script>
+  <script src="/static/js/app.js?v=20260609-1"></script>
 </body>
 </html>

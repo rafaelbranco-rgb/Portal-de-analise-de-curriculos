@@ -1284,6 +1284,61 @@ main {
   border: 1px solid rgba(239, 106, 106, 0.3);
 }
 
+/* Indicador de PCD (consultivo) */
+.pcd-indicator {
+  border: 1px solid var(--accent-line, rgba(255, 255, 255, 0.12));
+  border-left-width: 4px;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.pcd-indicator .pcd-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.pcd-indicator .pcd-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.pcd-indicator.ok { border-left-color: var(--ok); }
+.pcd-indicator.ok .pcd-dot { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+.pcd-indicator.warn { border-left-color: var(--warn); }
+.pcd-indicator.warn .pcd-dot { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+.pcd-indicator.info { border-left-color: #6ab4ef; }
+.pcd-indicator.info .pcd-dot { background: #6ab4ef; box-shadow: 0 0 8px #6ab4ef; }
+.pcd-indicator.muted { border-left-color: rgba(255, 255, 255, 0.2); }
+.pcd-indicator.muted .pcd-dot { background: rgba(255, 255, 255, 0.4); }
+.pcd-parecer {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-soft, rgba(255, 255, 255, 0.78));
+}
+.pcd-condicao {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+.pcd-sublabel {
+  display: block;
+  margin-top: 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+.pcd-disclaimer {
+  margin: 12px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  opacity: 0.55;
+  font-style: italic;
+}
+
 /* Score por vaga */
 .vaga-scores {
   display: flex;
@@ -1499,6 +1554,49 @@ main {
 .summary-card .num.media { color: var(--warn); }
 .summary-card .num.baixa { color: var(--bad); }
 .summary-card .num.gold { color: var(--aurora-gold); }
+.summary-card .num.pcd { color: #6ab4ef; }
+
+/* Filtro do histórico (reaproveita .filter-chip) */
+.history-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0 18px;
+}
+.history-filters .filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Etiqueta discreta e neutra de PCD na linha do histórico */
+.candidate-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.candidate-name .cand-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.pcd-tag {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px 1px 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #6ab4ef;
+  background: rgba(106, 180, 239, 0.12);
+  border: 1px solid rgba(106, 180, 239, 0.32);
+}
 
 .summary-card .label {
   font-size: 11px;

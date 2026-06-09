@@ -21,6 +21,10 @@ MONDAY_API = "https://api.monday.com/v2"
 # RH renomear as colunas.
 STATUS_COL_TITLES = ("avaliação de currículo", "avaliacao de curriculo")
 FILE_COL_TITLES = ("anexe seu currículo", "anexe seu curriculo", "currículo", "curriculo")
+# Colunas novas do formulário relacionadas a PCD (Pessoa com Deficiência).
+PCD_COL_TITLES = ("pcd",)
+PCD_ESPEC_COL_TITLES = ("especifica",)   # "Especificação:"
+LAUDO_COL_TITLES = ("laudo",)            # "Laudo Atualizado" (coluna de arquivo)
 
 # Mapa Departamento (rótulo no recrutamento) -> board de Captação do setor.
 # Setores sem board (Geral, CGI, Recepção, Supervisão, Portaria, Marketing) ficam
@@ -95,6 +99,37 @@ def _match_col(columns: list[dict[str, Any]], titles: tuple[str, ...],
     return None
 
 
+def _resolve_first_asset(col_values: dict[str, Any],
+                         col: dict[str, Any] | None) -> tuple[str | None, str | None]:
+    """Dada uma coluna 'file', resolve (public_url, nome) do primeiro anexo.
+
+    Devolve (None, None) se não houver coluna, anexo ou se a API falhar.
+    """
+    if not col:
+        return None, None
+    raw = (col_values.get(col["id"], {}) or {}).get("value")
+    if not raw:
+        return None, None
+    asset_ids: list[str] = []
+    try:
+        parsed = json.loads(raw)
+        for f in parsed.get("files", []):
+            aid = f.get("assetId") or f.get("asset_id")
+            if aid:
+                asset_ids.append(str(aid))
+    except (ValueError, AttributeError):
+        return None, None
+    if not asset_ids:
+        return None, None
+    assets = _gql(
+        "query ($aids: [ID!]!) { assets (ids: $aids) { id name public_url } }",
+        {"aids": asset_ids},
+    ).get("assets") or []
+    if assets:
+        return assets[0].get("public_url"), assets[0].get("name")
+    return None, None
+
+
 def get_item_context(item_id: str | int) -> dict[str, Any]:
     """Lê o item: nome, IDs das colunas (status/arquivo), etiqueta atual e a
     URL pública (temporária) do currículo anexado."""
@@ -134,29 +169,10 @@ def get_item_context(item_id: str | int) -> dict[str, Any]:
 
     status_now = (col_values.get(status_col["id"], {}) or {}).get("text") or ""
 
-    # assetIds do currículo anexado
-    file_raw = (col_values.get(file_col["id"], {}) or {}).get("value")
-    asset_ids: list[str] = []
-    if file_raw:
-        try:
-            parsed = json.loads(file_raw)
-            for f in parsed.get("files", []):
-                aid = f.get("assetId") or f.get("asset_id")
-                if aid:
-                    asset_ids.append(str(aid))
-        except (ValueError, AttributeError):
-            pass
-
-    cv_url = None
-    cv_name = None
-    if asset_ids:
-        assets = _gql(
-            "query ($aids: [ID!]!) { assets (ids: $aids) { id name public_url } }",
-            {"aids": asset_ids},
-        ).get("assets") or []
-        if assets:
-            cv_url = assets[0].get("public_url")
-            cv_name = assets[0].get("name")
+    # Currículo e Laudo Atualizado: dois anexos distintos do mesmo item.
+    cv_url, cv_name = _resolve_first_asset(col_values, file_col)
+    laudo_col = _match_col(columns, LAUDO_COL_TITLES, col_type="file")
+    laudo_url, laudo_name = _resolve_first_asset(col_values, laudo_col)
 
     return {
         "item_id": str(item.get("id")),
@@ -171,6 +187,11 @@ def get_item_context(item_id: str | int) -> dict[str, Any]:
         "cargo": _txt(_match_col(columns, ("cargo",), "status")),
         "email": _txt(_match_col(columns, ("mail",))),
         "telefone": _txt(_match_col(columns, ("telefone", "fone", "celular"))),
+        # Campos PCD (consultivos — não alteram a triagem por mérito).
+        "pcd": _txt(_match_col(columns, PCD_COL_TITLES)),
+        "pcd_especificacao": _txt(_match_col(columns, PCD_ESPEC_COL_TITLES)),
+        "laudo_url": laudo_url,
+        "laudo_name": laudo_name,
     }
 
 

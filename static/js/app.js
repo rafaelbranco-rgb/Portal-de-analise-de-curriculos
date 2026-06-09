@@ -409,6 +409,10 @@
     verdictEl.className = "ai-verdict " + vKey;
 
     renderBullets("ai-indicators", aiDet.indicadores || [], "Nenhum indicador relevante.");
+
+    // Indicador de PCD (consultivo)
+    renderPcd(r.analise_pcd);
+
     renderBullets("strong-points", r.pontos_fortes || [], "Nenhum ponto forte destacado.");
     renderBullets("weak-points", r.pontos_atencao || [], "Nenhum ponto de atenção.");
 
@@ -421,6 +425,51 @@
     sortedVagas.forEach((v) => {
       vagaList.appendChild(buildVagaRow(v));
     });
+  }
+
+  // Mapeia o indicador do agente para rótulo padrão + classe de cor.
+  const PCD_INDICADORES = {
+    sem_interferencia: { key: "ok", label: "Sem interferência prevista" },
+    compativel_com_adaptacoes: { key: "warn", label: "Compatível com adaptações" },
+    requer_avaliacao_ocupacional: { key: "info", label: "Requer avaliação ocupacional" },
+    nao_informado: { key: "muted", label: "Não informado" },
+  };
+
+  function renderPcd(pcd) {
+    const block = document.getElementById("pcd-block");
+    // Sem dado de PCD ou explicitamente não informado → esconde o bloco.
+    const indicador = pcd && pcd.indicador;
+    if (!pcd || !pcd.is_pcd || indicador === "nao_informado" || !indicador) {
+      block.hidden = true;
+      return;
+    }
+    block.hidden = false;
+
+    const meta = PCD_INDICADORES[indicador] || PCD_INDICADORES.nao_informado;
+    const card = document.getElementById("pcd-indicator");
+    card.className = "pcd-indicator " + meta.key;
+
+    document.getElementById("pcd-titulo").textContent = pcd.titulo || meta.label;
+    document.getElementById("pcd-parecer").textContent = pcd.parecer || "—";
+
+    const cond = document.getElementById("pcd-condicao");
+    const condTxt = (pcd.condicao_declarada || "").trim();
+    if (condTxt && condTxt.toLowerCase() !== "não informado") {
+      cond.textContent = "Condição declarada: " + condTxt;
+      cond.hidden = false;
+    } else {
+      cond.textContent = "";
+      cond.hidden = true;
+    }
+
+    const adapt = pcd.adaptacoes_sugeridas || [];
+    const wrap = document.getElementById("pcd-adaptacoes-wrap");
+    if (adapt.length) {
+      wrap.hidden = false;
+      renderBullets("pcd-adaptacoes", adapt, "");
+    } else {
+      wrap.hidden = true;
+    }
   }
 
   const NOTA_LABELS = {
@@ -665,78 +714,128 @@
   // ---------------------------------------------------------------
   const historyList = document.getElementById("history-list");
   const historyEmpty = document.getElementById("history-empty");
+  const historyFilterEmpty = document.getElementById("history-filter-empty");
   const historySummary = document.getElementById("history-summary");
+  const historyFilters = document.getElementById("history-filters");
+
+  let historyItems = [];
+  let pcdFilter = "all"; // "all" | "pcd"
+
+  // Considera PCD apenas quando o agente confirmou condição declarada com
+  // indicador efetivo (ignora "nao_informado").
+  function isPcd(it) {
+    const p = it && it.pcd;
+    return !!(p && p.is_pcd && p.indicador && p.indicador !== "nao_informado");
+  }
 
   async function loadHistory() {
-    historyList.innerHTML = "";
-    historySummary.innerHTML = "";
     try {
       const resp = await fetch("/api/analyses");
       const items = await resp.json();
-      if (!Array.isArray(items) || items.length === 0) {
-        historyEmpty.hidden = false;
-        return;
-      }
-      historyEmpty.hidden = true;
-
-      // Sumário
-      const total = items.length;
-      const alta = items.filter((i) => classKey(i.classificacao) === "alta").length;
-      const media = items.filter((i) => classKey(i.classificacao) === "media").length;
-      const baixa = items.filter((i) => classKey(i.classificacao) === "baixa").length;
-      const avg =
-        items.reduce((acc, i) => acc + (Number(i.score_final) || 0), 0) /
-        Math.max(total, 1);
-
-      historySummary.innerHTML = `
-        <div class="summary-card"><div class="num">${total}</div><div class="label">Total</div></div>
-        <div class="summary-card"><div class="num alta">${alta}</div><div class="label">Alta aderência</div></div>
-        <div class="summary-card"><div class="num media">${media}</div><div class="label">Média aderência</div></div>
-        <div class="summary-card"><div class="num baixa">${baixa}</div><div class="label">Baixa aderência</div></div>
-        <div class="summary-card"><div class="num gold">${avg.toFixed(1)}</div><div class="label">Score médio</div></div>
-      `;
-
-      items.forEach((it) => {
-        const row = document.createElement("div");
-        row.className = "history-row";
-        const k = classKey(it.classificacao);
-        row.innerHTML = `
-          <div class="candidate">
-            <div class="candidate-name">${escapeHTML(it.candidato_nome || "(sem nome)")}</div>
-            <div class="candidate-file">${escapeHTML(it.arquivo || "")}</div>
-          </div>
-          <div class="col-job" title="${escapeHTML(it.vaga_recomendada || "")}">
-            ${escapeHTML(it.vaga_recomendada || "—")}
-          </div>
-          <div class="col-score ${k}">${(Number(it.score_final) || 0).toFixed(1)}</div>
-          <div class="col-date">${escapeHTML(formatDate(it.criado_em))}</div>
-          <button class="col-delete" title="Excluir" aria-label="Excluir">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-              <line x1="10" y1="11" x2="10" y2="17"/>
-              <line x1="14" y1="11" x2="14" y2="17"/>
-            </svg>
-          </button>
-        `;
-        row.addEventListener("click", () => openAnalysis(it.id));
-        row.querySelector(".col-delete").addEventListener("click", async (e) => {
-          e.stopPropagation();
-          if (!confirm(`Excluir a análise de "${it.candidato_nome}"?`)) return;
-          const r = await fetch(`/api/analyses/${it.id}`, { method: "DELETE" });
-          if (r.ok) {
-            toast("Análise excluída.", "success");
-            loadHistory();
-          } else {
-            toast("Erro ao excluir.", "error");
-          }
-        });
-        historyList.appendChild(row);
-      });
+      historyItems = Array.isArray(items) ? items : [];
     } catch (err) {
       toast("Erro ao carregar histórico: " + err.message, "error");
+      return;
     }
+    renderHistory();
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = "";
+    historySummary.innerHTML = "";
+    historyFilterEmpty.hidden = true;
+
+    if (!historyItems.length) {
+      historyEmpty.hidden = false;
+      historyFilters.hidden = true;
+      return;
+    }
+    historyEmpty.hidden = true;
+    historyFilters.hidden = false;
+
+    // Sumário — sempre sobre o conjunto completo (visão geral).
+    const total = historyItems.length;
+    const alta = historyItems.filter((i) => classKey(i.classificacao) === "alta").length;
+    const media = historyItems.filter((i) => classKey(i.classificacao) === "media").length;
+    const baixa = historyItems.filter((i) => classKey(i.classificacao) === "baixa").length;
+    const pcdCount = historyItems.filter(isPcd).length;
+    const avg =
+      historyItems.reduce((acc, i) => acc + (Number(i.score_final) || 0), 0) /
+      Math.max(total, 1);
+
+    historySummary.innerHTML = `
+      <div class="summary-card"><div class="num">${total}</div><div class="label">Total</div></div>
+      <div class="summary-card"><div class="num alta">${alta}</div><div class="label">Alta aderência</div></div>
+      <div class="summary-card"><div class="num media">${media}</div><div class="label">Média aderência</div></div>
+      <div class="summary-card"><div class="num baixa">${baixa}</div><div class="label">Baixa aderência</div></div>
+      <div class="summary-card"><div class="num pcd">${pcdCount}</div><div class="label">PCD</div></div>
+      <div class="summary-card"><div class="num gold">${avg.toFixed(1)}</div><div class="label">Score médio</div></div>
+    `;
+
+    const rows = pcdFilter === "pcd" ? historyItems.filter(isPcd) : historyItems;
+    if (!rows.length) {
+      historyFilterEmpty.hidden = false;
+      return;
+    }
+
+    rows.forEach((it) => {
+      const row = document.createElement("div");
+      row.className = "history-row";
+      const k = classKey(it.classificacao);
+      const pcdTag = isPcd(it)
+        ? `<span class="pcd-tag" title="Pessoa com deficiência — parecer de acessibilidade no laudo">
+             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+               <circle cx="12" cy="4" r="2"/><path d="M19 13h-6V6"/><path d="M13 9.5l5 1.5"/>
+               <path d="M9 8.5l1.5 6.5h4l3 5"/><circle cx="9" cy="18" r="3.5"/>
+             </svg>PCD</span>`
+        : "";
+      row.innerHTML = `
+        <div class="candidate">
+          <div class="candidate-name"><span class="cand-name-text">${escapeHTML(it.candidato_nome || "(sem nome)")}</span>${pcdTag}</div>
+          <div class="candidate-file">${escapeHTML(it.arquivo || "")}</div>
+        </div>
+        <div class="col-job" title="${escapeHTML(it.vaga_recomendada || "")}">
+          ${escapeHTML(it.vaga_recomendada || "—")}
+        </div>
+        <div class="col-score ${k}">${(Number(it.score_final) || 0).toFixed(1)}</div>
+        <div class="col-date">${escapeHTML(formatDate(it.criado_em))}</div>
+        <button class="col-delete" title="Excluir" aria-label="Excluir">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </button>
+      `;
+      row.addEventListener("click", () => openAnalysis(it.id));
+      row.querySelector(".col-delete").addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm(`Excluir a análise de "${it.candidato_nome}"?`)) return;
+        const r = await fetch(`/api/analyses/${it.id}`, { method: "DELETE" });
+        if (r.ok) {
+          toast("Análise excluída.", "success");
+          loadHistory();
+        } else {
+          toast("Erro ao excluir.", "error");
+        }
+      });
+      historyList.appendChild(row);
+    });
+  }
+
+  if (historyFilters) {
+    historyFilters.addEventListener("click", (e) => {
+      const chip = e.target.closest("[data-pcd-filter]");
+      if (!chip) return;
+      pcdFilter = chip.getAttribute("data-pcd-filter");
+      historyFilters
+        .querySelectorAll(".filter-chip")
+        .forEach((c) => c.classList.toggle("active", c === chip));
+      renderHistory();
+    });
   }
 
   async function openAnalysis(id) {
