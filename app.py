@@ -503,6 +503,20 @@ def monday_webhook():
     # 4) Baixa + extrai + analisa.
     try:
         arquivo, curriculo_texto = _download_and_extract(ctx["cv_url"])
+    except UnsupportedFileError as exc:
+        # Formato que nunca vai ser lido (foto .jpg/.png/.heic, arquivo vazio).
+        # 200 para o Monday não reenviar em loop + recado no item para o RH.
+        audit_log.log("triagem", "extract_failed", f"Falha ao ler CV: {exc}",
+                      level="warn", meta={"item_id": item_id})
+        try:
+            monday_client.create_update(
+                ctx["item_id"],
+                f"Triagem automática não realizada: {exc} "
+                "Favor solicitar o currículo em PDF, DOCX ou TXT ao candidato.",
+            )
+        except monday_client.MondayError:
+            pass
+        return jsonify({"ok": True, "skipped": f"arquivo não suportado: {exc}"}), 200
     except Exception as exc:  # noqa: BLE001
         audit_log.log("triagem", "extract_failed", f"Falha ao ler CV: {exc}",
                       level="error", meta={"item_id": item_id})
@@ -527,9 +541,26 @@ def monday_webhook():
     try:
         resultado = analisar_curriculo(curriculo_texto, vagas, pcd_context=pcd_context)
     except AnalyzerError as exc:
-        status = 429 if exc.kind == "quota" else 502
         audit_log.log("triagem", "failed", f"Falha na análise: {exc}", level="error",
                       meta={"item_id": item_id, "kind": exc.kind})
+        # Falha de formato já esgotou a tentativa em modo enxuto: reenviar não
+        # resolve. Devolvemos 200 para o Monday PARAR de reenviar o webhook de 2
+        # em 2 minutos, e deixamos um recado no item para o RH avaliar à mão.
+        if exc.kind == "parse":
+            try:
+                monday_client.create_update(
+                    ctx["item_id"],
+                    "Triagem automática não concluída: a análise não retornou um "
+                    "resultado legível para este currículo. Favor avaliar manualmente.",
+                )
+            except monday_client.MondayError:
+                pass
+            return jsonify({
+                "ok": True,
+                "skipped": "análise ilegível — encaminhado para avaliação manual",
+                "erro": str(exc),
+            }), 200
+        status = 429 if exc.kind == "quota" else 502
         return jsonify({"error": str(exc), "kind": exc.kind}), status
 
     candidato_nome = (

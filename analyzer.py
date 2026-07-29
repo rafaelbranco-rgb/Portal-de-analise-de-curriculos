@@ -34,14 +34,11 @@ Você precisa avaliar o currículo abaixo, comparando-o com TODAS as vagas
 disponíveis. Identifique para qual vaga o candidato é mais indicado, calcule
 um score ponderado para CADA vaga, e detecte se o currículo foi gerado por IA.
 
-IMPORTANTE: existem MUITAS vagas (50+). Avalie TODAS, mas seja eficiente:
-- Para vagas com BAIXA aderência (score < 4): justificativa curta (1 linha)
-- Para vagas com MÉDIA ou ALTA aderência: justificativa mais detalhada
-- Para CADA vaga preencha "resumo_executivo", "pontos_fortes" e "pontos_atencao"
-  específicos daquela vaga (1-3 itens cada); seja conciso para as de baixa aderência
 - A "vaga_recomendada" deve ser SEMPRE a de maior score real, NÃO um chute
 - Considere a LOCALIDADE da vaga vs do candidato: se vagas e CV são de cidades
   diferentes, NÃO descarte automaticamente, mas registre em pontos de atenção
+
+{detalhe_block}
 
 ## VAGAS DISPONÍVEIS
 {vagas_block}
@@ -107,9 +104,9 @@ Vereditos possíveis: "Provável humano" (<35), "Possível IA" (35-69), "Prováv
       }},
       "score": 0.0-10.0,
       "classificacao": "Alta aderência|Média aderência|Baixa aderência",
-      "resumo_executivo": "2-3 linhas explicando a aderência do candidato A ESTA vaga específica",
-      "pontos_fortes": ["aspectos que favorecem o candidato NESTA vaga"],
-      "pontos_atencao": ["lacunas/riscos do candidato NESTA vaga"]
+      "resumo_executivo": "APENAS nas vagas detalhadas (ver CONTROLE DE TAMANHO): 1-2 linhas sobre a aderência A ESTA vaga",
+      "pontos_fortes": ["APENAS nas vagas detalhadas: aspectos que favorecem o candidato NESTA vaga"],
+      "pontos_atencao": ["APENAS nas vagas detalhadas: lacunas/riscos do candidato NESTA vaga"]
     }}
   ],
   "vaga_recomendada": {{
@@ -142,6 +139,47 @@ Vereditos possíveis: "Provável humano" (<35), "Possível IA" (35-69), "Prováv
 }}
 
 Responda APENAS com o JSON. Sem markdown, sem comentário."""
+
+
+# Controle de tamanho da resposta. Com 50+ vagas, pedir resumo + pontos fortes +
+# pontos de atenção para TODAS elas estoura o limite de tokens de saída e o JSON
+# volta cortado no meio (erro "JSON inválido"). Por isso o detalhe por vaga fica
+# restrito às melhores; as demais devolvem só nota/score.
+DETALHE_COMPLETO = """## CONTROLE DE TAMANHO DA RESPOSTA (regra obrigatória)
+Sua resposta tem um LIMITE de tamanho. Se você exceder, ela é cortada no meio e
+TODO o trabalho é perdido. Portanto:
+- Pontue TODAS as vagas: nenhuma pode faltar em "scores_por_vaga".
+- Detalhe APENAS as {top_n} vagas de MAIOR score. Nessas, preencha
+  "resumo_executivo" (máximo 2 linhas), "pontos_fortes" e "pontos_atencao"
+  (máximo 3 itens de até 140 caracteres cada).
+- Para TODAS as outras vagas devolva SOMENTE os campos "vaga_id", "vaga_titulo",
+  "notas", "score" e "classificacao". OMITA "resumo_executivo", "pontos_fortes"
+  e "pontos_atencao" — não os devolva vazios, simplesmente não os inclua.
+- Nunca repita a descrição da vaga nem trechos do currículo na resposta.
+"""
+
+DETALHE_ENXUTO = """## CONTROLE DE TAMANHO DA RESPOSTA — MODO ENXUTO (regra obrigatória)
+A tentativa anterior estourou o limite e foi cortada. Agora seja radicalmente
+mais econômico:
+- Pontue TODAS as vagas, mas para CADA UMA devolva SOMENTE os campos "vaga_id",
+  "vaga_titulo", "notas", "score" e "classificacao".
+- NÃO inclua "resumo_executivo", "pontos_fortes" nem "pontos_atencao" dentro de
+  "scores_por_vaga" para NENHUMA vaga.
+- Nos campos globais (fora de "scores_por_vaga"), mantenha a análise completa,
+  mas objetiva: "resumo_executivo" com até 4 linhas, "pontos_fortes" e
+  "pontos_atencao" com até 4 itens curtos cada.
+- Nunca repita a descrição da vaga nem trechos do currículo na resposta.
+"""
+
+
+def _detalhe_block(modo: str) -> str:
+    if modo == "enxuto":
+        return DETALHE_ENXUTO
+    try:
+        top_n = max(1, int(os.environ.get("ANALISE_TOP_DETALHE", "8")))
+    except ValueError:
+        top_n = 8
+    return DETALHE_COMPLETO.format(top_n=top_n)
 
 
 PCD_BLOCK_TEMPLATE = """
@@ -275,21 +313,52 @@ def _candidate_models() -> list[str]:
     return chain
 
 
-def _call_model(model_name: str, prompt: str) -> str:
+# Teto de tokens de saída. Nos modelos 2.5 o "raciocínio interno" do modelo
+# consome o MESMO orçamento da resposta visível, então um teto apertado corta o
+# JSON no meio. 65536 é o máximo aceito pelo gemini-2.5-pro/flash.
+MAX_OUTPUT_TOKENS = 65536
+
+
+def _extract_text_and_finish(response: Any) -> tuple[str, str]:
+    """Devolve (texto, motivo_de_parada) sem estourar quando não há texto.
+
+    ``response.text`` levanta exceção se o candidato não tiver parte textual
+    (acontece justamente quando a geração é interrompida). Aqui montamos o texto
+    a partir das partes e lemos o ``finish_reason`` para saber se foi corte por
+    limite de tokens (``MAX_TOKENS``).
+    """
+    finish = ""
+    chunks: list[str] = []
+    try:
+        candidates = list(getattr(response, "candidates", None) or [])
+    except Exception:  # noqa: BLE001
+        candidates = []
+    if candidates:
+        cand = candidates[0]
+        reason = getattr(cand, "finish_reason", None)
+        if reason is not None:
+            finish = getattr(reason, "name", None) or str(reason)
+        parts = getattr(getattr(cand, "content", None), "parts", None) or []
+        for part in parts:
+            text = getattr(part, "text", "") or ""
+            if text:
+                chunks.append(text)
+    return "".join(chunks), finish
+
+
+def _call_model(model_name: str, prompt: str) -> tuple[str, str]:
     # temperature=0 + top_p=1 = saída quase determinística para o mesmo prompt.
-    # max_output_tokens alto para suportar 50+ vagas no JSON de resposta.
     model = genai.GenerativeModel(
         model_name=model_name,
         system_instruction=SYSTEM_INSTRUCTIONS,
         generation_config={
             "temperature": 0.0,
             "top_p": 1.0,
-            "max_output_tokens": 32768,
+            "max_output_tokens": MAX_OUTPUT_TOKENS,
             "response_mime_type": "application/json",
         },
     )
-    response = model.generate_content(prompt)
-    return response.text or ""
+    return _extract_text_and_finish(model.generate_content(prompt))
 
 
 def analisar_curriculo(
@@ -301,51 +370,71 @@ def analisar_curriculo(
         raise AnalyzerError("O currículo está vazio ou ilegível.", kind="input")
 
     _configure()
-    prompt = PROMPT_TEMPLATE.format(
-        vagas_block=_format_vagas(vagas),
-        curriculo_texto=curriculo_texto[:30000],
-        pcd_block=_build_pcd_block(pcd_context),
-    )
+    vagas_block = _format_vagas(vagas)
+    pcd_block = _build_pcd_block(pcd_context)
+    curriculo = curriculo_texto[:30000]
+
+    def _prompt(modo: str) -> str:
+        return PROMPT_TEMPLATE.format(
+            vagas_block=vagas_block,
+            curriculo_texto=curriculo,
+            pcd_block=pcd_block,
+            detalhe_block=_detalhe_block(modo),
+        )
 
     last_quota_retry: float | None = None
-    last_error: Exception | None = None
+    ultimo_motivo = ""    # finish_reason da última resposta ilegível
+    ultimo_preview = ""
 
     for model_name in _candidate_models():
-        try:
-            raw = _call_model(model_name, prompt)
-        except gax.ResourceExhausted as exc:
-            last_error = exc
-            last_quota_retry = _retry_after_seconds(exc) or last_quota_retry
-            # Tenta o próximo modelo.
+        sem_cota = False
+        # 1ª tentativa: detalhe nas melhores vagas. Se a resposta vier cortada,
+        # 2ª tentativa no mesmo modelo em modo enxuto (resposta bem menor).
+        for modo in ("completo", "enxuto"):
+            try:
+                raw, motivo_parada = _call_model(model_name, _prompt(modo))
+            except gax.ResourceExhausted as exc:
+                last_quota_retry = _retry_after_seconds(exc) or last_quota_retry
+                sem_cota = True
+                break  # tenta o próximo modelo
+            except gax.GoogleAPIError as exc:
+                raise AnalyzerError(
+                    f"Falha na API do Gemini ({exc.__class__.__name__}). "
+                    "Verifique a conexão e tente novamente.",
+                    kind="api",
+                ) from exc
+            except Exception as exc:  # noqa: BLE001
+                raise AnalyzerError(
+                    "Erro inesperado ao chamar o Gemini. Tente novamente em alguns segundos.",
+                    kind="api",
+                ) from exc
+
+            cleaned = _strip_json(raw)
+            try:
+                data = json.loads(cleaned)
+            except json.JSONDecodeError:
+                # Resposta interrompida no meio (normalmente motivo MAX_TOKENS).
+                ultimo_motivo = motivo_parada or "desconhecido"
+                ultimo_preview = cleaned[:240].replace("\n", " ")
+                continue
+
+            # Anota o modelo que efetivamente respondeu — útil para entender
+            # variações de score (cada modelo pode pontuar diferente).
+            if isinstance(data, dict):
+                data["_model_used"] = model_name
+                data["_modo_resposta"] = modo
+            return data
+
+        if sem_cota:
             continue
-        except gax.GoogleAPIError as exc:
-            raise AnalyzerError(
-                f"Falha na API do Gemini ({exc.__class__.__name__}). "
-                "Verifique a conexão e tente novamente.",
-                kind="api",
-            ) from exc
-        except Exception as exc:  # noqa: BLE001
-            raise AnalyzerError(
-                "Erro inesperado ao chamar o Gemini. Tente novamente em alguns segundos.",
-                kind="api",
-            ) from exc
 
-        cleaned = _strip_json(raw)
-        try:
-            data = json.loads(cleaned)
-        except json.JSONDecodeError as exc:
-            preview = cleaned[:240].replace("\n", " ")
-            raise AnalyzerError(
-                f"O modelo retornou um JSON inválido. Tente novamente. "
-                f"Trecho recebido: \"{preview}…\"",
-                kind="parse",
-            ) from exc
-
-        # Anota o modelo que efetivamente respondeu — útil para entender
-        # variações de score (cada modelo pode pontuar diferente).
-        if isinstance(data, dict):
-            data["_model_used"] = model_name
-        return data
+        # Os dois modos falharam por formato: reenviar não resolve.
+        raise AnalyzerError(
+            "A resposta da análise veio incompleta e não pôde ser lida "
+            f"(motivo da interrupção: {ultimo_motivo}). Este currículo precisa de "
+            f"avaliação manual. Trecho recebido: \"{ultimo_preview}…\"",
+            kind="parse",
+        )
 
     # Esgotou todos os modelos com ResourceExhausted.
     retry_msg = (
