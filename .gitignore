@@ -21,3 +21,6 @@ data/analyses.json
 *.swp
 .DS_Store
 Thumbs.db
+
+# Vercel CLI (projeto linkado + .env.local com o token OIDC)
+.vercel
