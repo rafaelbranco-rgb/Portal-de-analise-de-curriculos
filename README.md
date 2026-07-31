@@ -71,6 +71,8 @@ remover usuários, em **Opções → Acesso e usuários**).
 
 - O **primeiro** usuário nasce das variáveis `PORTAL_ADMIN_EMAIL` e
   `PORTAL_ADMIN_SENHA` — válidas só enquanto o banco não tem nenhum usuário.
+  Perdeu o acesso? `PORTAL_ADMIN_RESET=1` recria ou redefine esse usuário mesmo
+  com o banco cheio; **remova a variável depois de entrar** (veja o DEPLOY.md).
 - A sessão dura 12 h de inatividade e o cookie é assinado com `SECRET_KEY`.
 - 5 senhas erradas bloqueiam a conta por 5 minutos.
 - Entradas, saídas, tentativas recusadas e cada abertura de currículo ficam

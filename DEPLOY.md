@@ -60,6 +60,26 @@ remova essas variáveis. Todos os usuários têm o mesmo nível de acesso.
 > **Não defina `SECRET_KEY` depois** de as pessoas já estarem usando: mudar a
 > chave derruba todas as sessões abertas (é só logar de novo, mas avisa).
 
+### Ninguém consegue mais entrar? (escotilha de recuperação)
+
+A senha é guardada só como hash — não existe forma de lê-la de volta. Se o
+acesso foi perdido, use a variável abaixo para **recriar ou redefinir** o
+administrador, mesmo já havendo usuários cadastrados:
+
+| Nome                  | Valor                                            |
+|-----------------------|--------------------------------------------------|
+| `PORTAL_ADMIN_RESET`  | `1`                                              |
+
+Com ela ligada (junto de `PORTAL_ADMIN_EMAIL` e `PORTAL_ADMIN_SENHA`), na
+próxima vez que alguém abrir o portal a conta é criada — ou, se o e-mail já
+existir, tem a senha trocada e o bloqueio por tentativas destravado.
+
+> ⚠️ **Remova `PORTAL_ADMIN_RESET` assim que conseguir entrar.** A verificação
+> roda a cada requisição: enquanto a variável estiver lá, a senha volta para o
+> valor da variável e qualquer troca feita em **Opções → Acesso e usuários** é
+> desfeita. Toda ação dessa escotilha fica registrada na auditoria como
+> `admin_criado` / `admin_senha_redefinida`.
+
 ## 4. (Importante) Tempo máximo da função
 
 A análise com o Gemini pode passar de 10s. Em **Settings → Functions**, aumente

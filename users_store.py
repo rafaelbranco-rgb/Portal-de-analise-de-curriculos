@@ -235,14 +235,50 @@ def ensure_seed_admin() -> dict[str, Any] | None:
 
     Só age quando a tabela está vazia — depois disso as variáveis são ignoradas
     (e podem ser removidas do painel da Vercel).
+
+    Escotilha de recuperação: com PORTAL_ADMIN_RESET=1 a função age mesmo com a
+    tabela cheia — cria o e-mail indicado se ele não existir, ou redefine a
+    senha (e destrava o bloqueio) se já existir. Serve para quando ninguém
+    consegue mais entrar. Como ela roda a cada requisição, a variável precisa
+    ser REMOVIDA depois de entrar: enquanto estiver ligada, qualquer troca de
+    senha feita na tela volta atrás.
     """
     email = _norm_email(os.environ.get("PORTAL_ADMIN_EMAIL"))
     senha = os.environ.get("PORTAL_ADMIN_SENHA") or ""
     if not email or not senha:
         return None
-    if count_users() > 0:
+    forcar = _flag(os.environ.get("PORTAL_ADMIN_RESET"))
+    if count_users() > 0 and not forcar:
         return None
     try:
-        return create_user(email, os.environ.get("PORTAL_ADMIN_NOME", ""), senha)
+        atual = get_user_by_email(email) if forcar else None
+        if atual:
+            set_password(atual["id"], senha)
+            _log_recuperacao("senha_redefinida", email)
+            return atual
+        novo = create_user(email, os.environ.get("PORTAL_ADMIN_NOME", ""), senha)
+        _log_recuperacao("criado" if forcar else "semeado", email)
+        return novo
     except UserError:
         return None
+
+
+def _flag(valor: str | None) -> bool:
+    return (valor or "").strip().lower() in {"1", "true", "sim", "yes", "on"}
+
+
+def _log_recuperacao(acao: str, email: str) -> None:
+    """Registra na auditoria. Import local e à prova de falha: se a auditoria
+    estiver indisponível, a recuperação do acesso não pode ser bloqueada."""
+    try:
+        import audit_log
+
+        audit_log.log(
+            "usuario",
+            f"admin_{acao}",
+            f"Acesso de administrador {acao.replace('_', ' ')} via variáveis de ambiente: {email}",
+            level="warning",
+            meta={"email": email, "origem": "PORTAL_ADMIN_*"},
+        )
+    except Exception:
+        pass
