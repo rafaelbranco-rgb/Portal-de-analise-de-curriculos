@@ -21,6 +21,11 @@ from db import get_cursor, init_db
 # sem depender do OpenSSL trazer scrypt.
 HASH_METHOD = "pbkdf2:sha256"
 
+# A tabela tem nome próprio ("users" seco colide com outro sistema que divide o
+# mesmo Postgres — o CREATE TABLE IF NOT EXISTS achava a tabela alheia e as
+# consultas quebravam com 'column "email" does not exist').
+TABELA = "portal_users"
+
 SENHA_MIN = 8
 MAX_FALHAS = 5          # tentativas erradas antes de bloquear
 BLOQUEIO_MINUTOS = 5    # tempo de bloqueio depois de estourar as tentativas
@@ -72,21 +77,21 @@ def validar_senha(senha: str) -> str:
 def count_users() -> int:
     init_db()
     with get_cursor() as cur:
-        cur.execute("SELECT COUNT(*) AS c FROM users")
+        cur.execute(f"SELECT COUNT(*) AS c FROM {TABELA}")
         return int(cur.fetchone()["c"])
 
 
 def list_users() -> list[dict[str, Any]]:
     init_db()
     with get_cursor() as cur:
-        cur.execute(f"SELECT {_COLS} FROM users ORDER BY nome, email")
+        cur.execute(f"SELECT {_COLS} FROM {TABELA} ORDER BY nome, email")
         return [dict(row) for row in cur.fetchall()]
 
 
 def get_user(user_id: str) -> dict[str, Any] | None:
     init_db()
     with get_cursor() as cur:
-        cur.execute(f"SELECT {_COLS} FROM users WHERE id = %s", (user_id,))
+        cur.execute(f"SELECT {_COLS} FROM {TABELA} WHERE id = %s", (user_id,))
         row = cur.fetchone()
         return dict(row) if row else None
 
@@ -94,7 +99,7 @@ def get_user(user_id: str) -> dict[str, Any] | None:
 def get_user_by_email(email: str) -> dict[str, Any] | None:
     init_db()
     with get_cursor() as cur:
-        cur.execute(f"SELECT {_COLS} FROM users WHERE email = %s", (_norm_email(email),))
+        cur.execute(f"SELECT {_COLS} FROM {TABELA} WHERE email = %s", (_norm_email(email),))
         row = cur.fetchone()
         return dict(row) if row else None
 
@@ -116,7 +121,7 @@ def create_user(email: str, nome: str, senha: str) -> dict[str, Any]:
     try:
         with get_cursor() as cur:
             cur.execute(
-                "INSERT INTO users (id, email, nome, senha_hash, criado_em) "
+                f"INSERT INTO {TABELA} (id, email, nome, senha_hash, criado_em) "
                 "VALUES (%(id)s, %(email)s, %(nome)s, %(senha_hash)s, %(criado_em)s)",
                 item,
             )
@@ -136,7 +141,7 @@ def set_password(user_id: str, senha: str) -> bool:
     validar_senha(senha)
     with get_cursor() as cur:
         cur.execute(
-            "UPDATE users SET senha_hash = %s, falhas = 0, bloqueado_ate = NULL "
+            f"UPDATE {TABELA} SET senha_hash = %s, falhas = 0, bloqueado_ate = NULL "
             "WHERE id = %s",
             (generate_password_hash(senha, method=HASH_METHOD), user_id),
         )
@@ -146,7 +151,7 @@ def set_password(user_id: str, senha: str) -> bool:
 def delete_user(user_id: str) -> bool:
     init_db()
     with get_cursor() as cur:
-        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        cur.execute(f"DELETE FROM {TABELA} WHERE id = %s", (user_id,))
         return cur.rowcount > 0
 
 
@@ -170,7 +175,7 @@ def autenticar(email: str, senha: str) -> dict[str, Any]:
     with get_cursor() as cur:
         cur.execute(
             "SELECT id, email, nome, senha_hash, falhas, bloqueado_ate "
-            "FROM users WHERE email = %s",
+            f"FROM {TABELA} WHERE email = %s",
             (email,),
         )
         row = cur.fetchone()
@@ -192,7 +197,7 @@ def autenticar(email: str, senha: str) -> dict[str, Any]:
         with get_cursor() as cur:
             if bloqueou:
                 cur.execute(
-                    "UPDATE users SET falhas = 0, bloqueado_ate = %s WHERE id = %s",
+                    f"UPDATE {TABELA} SET falhas = 0, bloqueado_ate = %s WHERE id = %s",
                     (
                         (agora + timedelta(minutes=BLOQUEIO_MINUTOS)).isoformat(),
                         row["id"],
@@ -200,7 +205,7 @@ def autenticar(email: str, senha: str) -> dict[str, Any]:
                 )
             else:
                 cur.execute(
-                    "UPDATE users SET falhas = %s WHERE id = %s", (falhas, row["id"])
+                    f"UPDATE {TABELA} SET falhas = %s WHERE id = %s", (falhas, row["id"])
                 )
         if bloqueou:
             raise UserError(
@@ -211,7 +216,7 @@ def autenticar(email: str, senha: str) -> dict[str, Any]:
 
     with get_cursor() as cur:
         cur.execute(
-            "UPDATE users SET falhas = 0, bloqueado_ate = NULL, ultimo_acesso = %s "
+            f"UPDATE {TABELA} SET falhas = 0, bloqueado_ate = NULL, ultimo_acesso = %s "
             "WHERE id = %s",
             (_now(), row["id"]),
         )
@@ -222,7 +227,7 @@ def verificar_senha(user_id: str, senha: str) -> bool:
     """Confere a senha atual de um usuário (usado na troca de senha)."""
     init_db()
     with get_cursor() as cur:
-        cur.execute("SELECT senha_hash FROM users WHERE id = %s", (user_id,))
+        cur.execute(f"SELECT senha_hash FROM {TABELA} WHERE id = %s", (user_id,))
         row = cur.fetchone()
         return bool(row) and check_password_hash(row["senha_hash"], senha or "")
 

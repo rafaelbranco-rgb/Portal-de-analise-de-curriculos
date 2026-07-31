@@ -43,7 +43,11 @@ CREATE TABLE IF NOT EXISTS analyses (
 );
 
 -- Usuários do portal (login individual). Senha sempre em hash — nunca em texto.
-CREATE TABLE IF NOT EXISTS users (
+-- O nome é "portal_users", e não "users", porque este Postgres é compartilhado
+-- com outro sistema que já tem uma tabela "users" com outras colunas: o
+-- CREATE TABLE IF NOT EXISTS encontrava a tabela alheia, não criava nada, e o
+-- login morria com 'column "email" does not exist'.
+CREATE TABLE IF NOT EXISTS portal_users (
     id            TEXT PRIMARY KEY,
     email         TEXT NOT NULL UNIQUE,
     nome          TEXT NOT NULL DEFAULT '',
