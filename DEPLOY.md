@@ -38,8 +38,27 @@ Em **Settings → Environment Variables**, adicione:
 | `GEMINI_API_KEY` | sua chave do Google AI Studio                                |
 | `GEMINI_MODEL`   | `gemini-2.5-pro` (ou `gemini-2.5-flash`, mais rápido/barato) |
 | `DATABASE_URL`   | a connection string do Postgres (passo 1)                    |
+| `SECRET_KEY`     | string aleatória longa — assina o cookie de login            |
 
 Depois faça **Redeploy** para as variáveis valerem.
+
+## 3b. Criar o primeiro acesso (login obrigatório)
+
+O portal só abre para quem tem login. O **primeiro** usuário nasce de duas
+variáveis de ambiente — elas só valem enquanto não existir nenhum usuário no
+banco:
+
+| Nome                  | Valor                                  |
+|-----------------------|----------------------------------------|
+| `PORTAL_ADMIN_EMAIL`  | seu e-mail                             |
+| `PORTAL_ADMIN_SENHA`  | senha inicial (mínimo 8 caracteres)    |
+| `PORTAL_ADMIN_NOME`   | seu nome (opcional)                    |
+
+Depois do primeiro login, cadastre a equipe em **Opções → Acesso e usuários** e
+remova essas variáveis. Todos os usuários têm o mesmo nível de acesso.
+
+> **Não defina `SECRET_KEY` depois** de as pessoas já estarem usando: mudar a
+> chave derruba todas as sessões abertas (é só logar de novo, mas avisa).
 
 ## 4. (Importante) Tempo máximo da função
 
@@ -52,6 +71,8 @@ timeout, é quase sempre isso.
 O banco começa vazio. Rode localmente (só precisa de Python, sem dependências):
 
 ```bash
+# a API exige login; scripts entram com a chave de automação
+$env:TRIAGEM_API_KEY="o_mesmo_valor_configurado_na_vercel"
 python seed_vagas.py https://SEU-APP.vercel.app
 ```
 

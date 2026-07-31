@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
+from psycopg2 import Binary
 from psycopg2.extras import Json
 
 from db import get_cursor, init_db
@@ -24,7 +25,8 @@ def list_analyses() -> list[dict[str, Any]]:
     init_db()
     with get_cursor() as cur:
         cur.execute(
-            "SELECT id, criado_em, arquivo, candidato_nome, resultado "
+            "SELECT id, criado_em, arquivo, candidato_nome, resultado, "
+            "(arquivo_bytes IS NOT NULL) AS tem_arquivo "
             "FROM analyses ORDER BY criado_em DESC"
         )
         rows = cur.fetchall()
@@ -39,6 +41,7 @@ def list_analyses() -> list[dict[str, Any]]:
                 "criado_em": item["criado_em"],
                 "arquivo": item.get("arquivo", ""),
                 "candidato_nome": item.get("candidato_nome", "(sem nome)"),
+                "tem_arquivo": bool(item.get("tem_arquivo")),
                 "score_final": resultado.get("score_final"),
                 "classificacao": resultado.get("classificacao"),
                 "vaga_recomendada": (resultado.get("vaga_recomendada") or {}).get(
@@ -60,15 +63,48 @@ def list_analyses() -> list[dict[str, Any]]:
 
 
 def get_analysis(analysis_id: str) -> dict[str, Any] | None:
+    """Análise completa para a tela — sem o conteúdo binário do arquivo."""
     init_db()
     with get_cursor() as cur:
         cur.execute(
             "SELECT id, criado_em, arquivo, candidato_nome, curriculo_preview, "
-            "resultado FROM analyses WHERE id = %s",
+            "resultado, arquivo_mime, arquivo_tamanho, "
+            "(arquivo_bytes IS NOT NULL) AS tem_arquivo "
+            "FROM analyses WHERE id = %s",
             (analysis_id,),
         )
         row = cur.fetchone()
-        return dict(row) if row else None
+        if not row:
+            return None
+        item = dict(row)
+        item["tem_arquivo"] = bool(item.get("tem_arquivo"))
+        return item
+
+
+def get_analysis_file(analysis_id: str) -> dict[str, Any] | None:
+    """Currículo original guardado junto da análise (para abrir/baixar).
+
+    Devolve ``None`` se a análise não existir; ``arquivo_bytes`` vem ``None``
+    quando o arquivo não foi guardado (análises feitas antes desta versão).
+    """
+    init_db()
+    with get_cursor() as cur:
+        cur.execute(
+            "SELECT arquivo, candidato_nome, arquivo_mime, arquivo_bytes "
+            "FROM analyses WHERE id = %s",
+            (analysis_id,),
+        )
+        row = cur.fetchone()
+        if not row:
+            return None
+        raw = row.get("arquivo_bytes")
+        return {
+            "arquivo": row.get("arquivo") or "curriculo",
+            "candidato_nome": row.get("candidato_nome") or "(sem nome)",
+            "arquivo_mime": row.get("arquivo_mime") or "",
+            # psycopg2 devolve BYTEA como memoryview.
+            "arquivo_bytes": bytes(raw) if raw is not None else None,
+        }
 
 
 def save_analysis(
@@ -76,6 +112,8 @@ def save_analysis(
     candidato_nome: str,
     resultado: dict[str, Any],
     curriculo_preview: str,
+    arquivo_bytes: bytes | None = None,
+    arquivo_mime: str = "",
 ) -> dict[str, Any]:
     init_db()
     item = {
@@ -85,14 +123,23 @@ def save_analysis(
         "candidato_nome": candidato_nome or "(sem nome)",
         "curriculo_preview": curriculo_preview[:4000],
         "resultado": resultado,
+        "arquivo_mime": arquivo_mime or "",
+        "arquivo_tamanho": len(arquivo_bytes or b""),
+        "tem_arquivo": arquivo_bytes is not None,
     }
     with get_cursor() as cur:
         cur.execute(
             "INSERT INTO analyses "
-            "(id, criado_em, arquivo, candidato_nome, curriculo_preview, resultado) "
+            "(id, criado_em, arquivo, candidato_nome, curriculo_preview, resultado, "
+            "arquivo_mime, arquivo_tamanho, arquivo_bytes) "
             "VALUES (%(id)s, %(criado_em)s, %(arquivo)s, %(candidato_nome)s, "
-            "%(curriculo_preview)s, %(resultado)s)",
-            {**item, "resultado": Json(resultado)},
+            "%(curriculo_preview)s, %(resultado)s, %(arquivo_mime)s, "
+            "%(arquivo_tamanho)s, %(arquivo_bytes)s)",
+            {
+                **item,
+                "resultado": Json(resultado),
+                "arquivo_bytes": Binary(arquivo_bytes) if arquivo_bytes else None,
+            },
         )
     return item
 

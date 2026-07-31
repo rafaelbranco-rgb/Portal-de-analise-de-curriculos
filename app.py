@@ -3,18 +3,21 @@ from __future__ import annotations
 
 import os
 import re
+from io import BytesIO
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, redirect, request, send_file, send_from_directory
 from flask_cors import CORS
 
 import analyses_store
 import audit_log
+import auth
 import jobs_store
 import monday_client
+import users_store
 from analyzer import AnalyzerError, analisar_curriculo
 from extractor import UnsupportedFileError, extract_text
 
@@ -23,20 +26,42 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).parent
 STATIC_DIR = BASE_DIR / "static"
+TEMPLATES_DIR = BASE_DIR / "templates"
 
 MAX_UPLOAD_SIZE = 8 * 1024 * 1024  # 8 MB
+
+# Tipo do arquivo por extensão — usado para guardar e reabrir o currículo.
+_EXT_MIME = {
+    ".pdf": "application/pdf",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".txt": "text/plain; charset=utf-8",
+}
 
 app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_SIZE
 CORS(app)
+# Login por sessão: registra as rotas /api/auth/*, /api/users/* e a trava que
+# exige login em todo o resto (menos webhook/triagem, que usam token próprio).
+auth.init_app(app)
+
+
+def _mime_for(arquivo: str) -> str:
+    return _EXT_MIME.get(Path(arquivo or "").suffix.lower(), "application/octet-stream")
 
 
 # ---------------------------------------------------------------------------
-# Rotas estáticas (SPA)
+# Rotas estáticas (SPA + tela de login)
 # ---------------------------------------------------------------------------
 @app.get("/")
 def index() -> object:
-    return send_from_directory(STATIC_DIR, "index.html")
+    return send_from_directory(TEMPLATES_DIR, "app.html")
+
+
+@app.get("/login")
+def login_page() -> object:
+    if auth.current_user():
+        return redirect("/")
+    return send_from_directory(TEMPLATES_DIR, "login.html")
 
 
 # ---------------------------------------------------------------------------
@@ -196,6 +221,8 @@ def analyze():
         candidato_nome=candidato_nome,
         resultado=resultado,
         curriculo_preview=curriculo_texto,
+        arquivo_bytes=raw,
+        arquivo_mime=_mime_for(uploaded.filename),
     )
 
     audit_log.log(
@@ -228,6 +255,9 @@ def analyze():
             "arquivo": uploaded.filename,
             "candidato_nome": candidato_nome,
             "tamanho_texto": len(curriculo_texto),
+            "tem_arquivo": saved["tem_arquivo"],
+            "arquivo_mime": saved["arquivo_mime"],
+            "arquivo_tamanho": saved["arquivo_tamanho"],
         }
     )
 
@@ -299,6 +329,7 @@ def triagem():
         threshold = 7.0
 
     arquivo = "(texto via n8n)"
+    raw: bytes | None = None  # conteúdo do arquivo, quando vier por URL
     if curriculo_texto_in:
         curriculo_texto = curriculo_texto_in
     elif file_url:
@@ -364,6 +395,8 @@ def triagem():
         candidato_nome=candidato_nome,
         resultado=resultado,
         curriculo_preview=curriculo_texto,
+        arquivo_bytes=raw,
+        arquivo_mime=_mime_for(arquivo) if raw else "",
     )
 
     audit_log.log(
@@ -407,8 +440,8 @@ def triagem():
 # O portal lê o CV anexado, analisa e escreve a etiqueta de avaliação de volta:
 #   score >= TRIAGEM_THRESHOLD  → APROV.ENTREVISTA
 #   score <  TRIAGEM_THRESHOLD  → REPROV.TRIAGEM  (se TRIAGEM_REPROVAR=1)
-def _download_and_extract(file_url: str) -> tuple[str, str]:
-    """Baixa o arquivo da URL e devolve (nome_arquivo, texto_extraído)."""
+def _download_and_extract(file_url: str) -> tuple[str, str, bytes]:
+    """Baixa o arquivo da URL e devolve (nome_arquivo, texto_extraído, conteúdo)."""
     resp = requests.get(file_url, timeout=30)
     resp.raise_for_status()
     raw = resp.content
@@ -419,7 +452,7 @@ def _download_and_extract(file_url: str) -> tuple[str, str]:
             f"Currículo maior que o limite ({MAX_UPLOAD_SIZE // (1024 * 1024)} MB)."
         )
     arquivo = _ensure_supported_name(_filename_from_download(file_url, resp), resp)
-    return arquivo, extract_text(arquivo, raw)
+    return arquivo, extract_text(arquivo, raw), raw
 
 
 # Rótulos da coluna PCD que significam "não é PCD / não declarado".
@@ -445,7 +478,7 @@ def _build_pcd_context(ctx: dict[str, object]) -> dict[str, object] | None:
     laudo_texto = ""
     if laudo_url:
         try:
-            _laudo_nome, laudo_texto = _download_and_extract(laudo_url)
+            _laudo_nome, laudo_texto, _laudo_raw = _download_and_extract(laudo_url)
         except Exception:  # noqa: BLE001 — laudo ilegível não pode quebrar a triagem
             laudo_texto = ""
 
@@ -502,7 +535,7 @@ def monday_webhook():
 
     # 4) Baixa + extrai + analisa.
     try:
-        arquivo, curriculo_texto = _download_and_extract(ctx["cv_url"])
+        arquivo, curriculo_texto, cv_raw = _download_and_extract(ctx["cv_url"])
     except UnsupportedFileError as exc:
         # Formato que nunca vai ser lido (foto .jpg/.png/.heic, arquivo vazio).
         # 200 para o Monday não reenviar em loop + recado no item para o RH.
@@ -606,6 +639,7 @@ def monday_webhook():
     saved = analyses_store.save_analysis(
         arquivo=arquivo, candidato_nome=candidato_nome,
         resultado=resultado, curriculo_preview=curriculo_texto,
+        arquivo_bytes=cv_raw, arquivo_mime=_mime_for(arquivo),
     )
     audit_log.log(
         "triagem", "completed",
@@ -637,6 +671,50 @@ def get_analysis(analysis_id: str):
     if not item:
         return jsonify({"error": "Análise não encontrada."}), 404
     return jsonify(item)
+
+
+@app.get("/api/analyses/<analysis_id>/curriculo")
+def get_analysis_file(analysis_id: str):
+    """Entrega o currículo original guardado junto da análise.
+
+    Sem `?download=1` abre no navegador (PDF/TXT); com, força o download.
+    Só responde a quem está logado — a trava global de login cuida disso.
+    """
+    rec = analyses_store.get_analysis_file(analysis_id)
+    if not rec:
+        return jsonify({"error": "Análise não encontrada."}), 404
+    if not rec["arquivo_bytes"]:
+        return jsonify(
+            {
+                "error": (
+                    "O currículo original não foi guardado nesta análise "
+                    "(feita antes desta atualização)."
+                ),
+                "kind": "input",
+            }
+        ), 404
+
+    mime = rec["arquivo_mime"] or _mime_for(rec["arquivo"])
+    baixar = (request.args.get("download") or "").lower() in ("1", "true", "sim")
+    # DOCX não abre no navegador — nesse caso vai sempre como download.
+    abre_no_navegador = mime.startswith("application/pdf") or mime.startswith("text/")
+
+    audit_log.log(
+        "acesso",
+        "curriculo_baixado" if baixar else "curriculo_aberto",
+        f"Currículo {'baixado' if baixar else 'aberto'}: {rec['candidato_nome']}",
+        meta={"analise_id": analysis_id, "arquivo": rec["arquivo"]},
+    )
+
+    resp = send_file(
+        BytesIO(rec["arquivo_bytes"]),
+        mimetype=mime,
+        as_attachment=baixar or not abre_no_navegador,
+        download_name=rec["arquivo"],
+        max_age=0,
+    )
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    return resp
 
 
 @app.delete("/api/analyses/<analysis_id>")
@@ -688,11 +766,19 @@ def clear_audit():
 # ---------------------------------------------------------------------------
 @app.get("/api/health")
 def health():
+    try:
+        usuarios = users_store.count_users()
+    except Exception:  # noqa: BLE001
+        usuarios = None
     return jsonify(
         {
             "ok": True,
             "gemini_configured": bool(os.environ.get("GEMINI_API_KEY", "").strip()),
             "model": os.environ.get("GEMINI_MODEL", "gemini-2.5-pro"),
+            "usuarios": usuarios,
+            # False = a chave de assinatura da sessão está sendo derivada dos
+            # outros segredos; trocar um deles desconecta todo mundo.
+            "secret_key_configurada": bool(app.config.get("SECRET_KEY_FROM_ENV")),
         }
     )
 

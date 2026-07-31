@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrar · Análise de Currículos</title>
+  <link rel="icon" type="image/png" href="/static/assets/logo-contato.png" />
+  <link rel="stylesheet" href="/static/css/styles.css?v=20260730-1" />
+  <style>
+    /* A tela de login não usa o layout do portal (topbar + seções), então o
+       posicionamento fica aqui mesmo — reaproveitando as classes de vidro,
+       campos e botões do styles.css. */
+    .login-wrap {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 34px 30px 28px;
+      border-radius: var(--radius-xl);
+    }
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+    .login-brand .brand-mark { width: 48px; height: 48px; }
+    .login-title {
+      margin: 0 0 6px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .login-sub {
+      margin: 0 0 22px;
+      font-size: 13.5px;
+      color: var(--text-3);
+      line-height: 1.5;
+    }
+    .login-actions { margin-top: 22px; }
+    .login-actions .btn { width: 100%; justify-content: center; }
+    .login-msg {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      line-height: 1.5;
+      border: 1px solid rgba(239, 106, 106, 0.35);
+      background: rgba(239, 106, 106, 0.1);
+      color: var(--text-1);
+    }
+    .login-msg.show { display: block; }
+    .login-msg.warn {
+      border-color: rgba(232, 194, 101, 0.35);
+      background: rgba(232, 194, 101, 0.1);
+    }
+    .login-hint {
+      margin: 18px 0 0;
+      font-size: 12px;
+      color: var(--text-3);
+      line-height: 1.6;
+    }
+    .login-hint code {
+      font-size: 11.5px;
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: rgba(125, 167, 255, 0.14);
+      color: var(--text-2);
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="login-wrap">
+    <form class="glass-strong login-card" id="login-form" autocomplete="on">
+      <div class="login-brand">
+        <div class="brand-mark">
+          <img src="/static/assets/logo-contato.png" alt="Contato Facilities" />
+        </div>
+        <div class="brand-title">
+          <strong>Contato Facilities</strong>
+          <span>Análise de Currículos</span>
+        </div>
+      </div>
+
+      <h1 class="login-title">Acesso restrito</h1>
+      <p class="login-sub">
+        Os currículos e pareceres são confidenciais. Entre com o seu e-mail e senha
+        para continuar.
+      </p>
+
+      <div class="field">
+        <label class="field-label" for="email">E-mail</label>
+        <input class="glass-input" id="email" name="email" type="email"
+               autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label class="field-label" for="senha">Senha</label>
+        <input class="glass-input" id="senha" name="senha" type="password"
+               autocomplete="current-password" required />
+      </div>
+
+      <div class="login-actions">
+        <button class="btn btn-primary" id="login-btn" type="submit">
+          Entrar
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="login-msg" id="login-msg"></div>
+
+      <p class="login-hint" id="login-hint">
+        Esqueceu a senha? Peça a outra pessoa com acesso para redefinir em
+        <strong>Opções → Acesso e usuários</strong>.
+      </p>
+    </form>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // Tema: mesma preferência guardada pelo portal.
+      var pref = localStorage.getItem("contato-theme") || "dark";
+      var efetivo = pref === "light" || pref === "dark"
+        ? pref
+        : (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches
+            ? "light" : "dark");
+      document.documentElement.dataset.theme = efetivo;
+
+      var form = document.getElementById("login-form");
+      var btn = document.getElementById("login-btn");
+      var msgEl = document.getElementById("login-msg");
+      var hintEl = document.getElementById("login-hint");
+
+      function msg(texto, tipo) {
+        msgEl.textContent = texto;
+        msgEl.className = "login-msg show" + (tipo === "warn" ? " warn" : "");
+      }
+
+      if (new URLSearchParams(location.search).has("expirado")) {
+        msg("Sua sessão expirou. Entre novamente para continuar.", "warn");
+      }
+
+      // Primeiro acesso / banco fora do ar: avisa em vez de deixar a pessoa
+      // tentando senha à toa.
+      fetch("/api/auth/status")
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.logado) { location.href = "/"; return; }
+          if (d.banco_ok === false) {
+            msg(d.erro || "Banco de dados indisponível.", "warn");
+            return;
+          }
+          if (d.sem_usuarios) {
+            msg(
+              "Nenhum usuário cadastrado ainda. Defina as variáveis " +
+              "PORTAL_ADMIN_EMAIL e PORTAL_ADMIN_SENHA no painel da Vercel " +
+              "para criar o primeiro acesso.",
+              "warn"
+            );
+            hintEl.innerHTML =
+              "Depois do primeiro login, cadastre as outras pessoas em " +
+              "<strong>Opções → Acesso e usuários</strong> — aí as variáveis " +
+              "<code>PORTAL_ADMIN_*</code> podem ser removidas.";
+          }
+        })
+        .catch(function () { /* silencioso: o login ainda pode funcionar */ });
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var email = document.getElementById("email").value.trim();
+        var senha = document.getElementById("senha").value;
+        if (!email || !senha) {
+          msg("Informe e-mail e senha.", "warn");
+          return;
+        }
+        var conteudoBtn = btn.innerHTML;
+        btn.disabled = true;
+        btn.textContent = "Entrando…";
+        try {
+          var resp = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email, senha: senha }),
+          });
+          var data = await resp.json();
+          if (!resp.ok) {
+            msg(data.error || "Não foi possível entrar.");
+            document.getElementById("senha").value = "";
+            return;
+          }
+          location.href = "/";
+        } catch (err) {
+          msg("Erro de rede: " + (err.message || err));
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = conteudoBtn;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

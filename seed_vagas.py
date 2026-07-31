@@ -24,9 +24,16 @@ BASE = (
 ).rstrip("/")
 
 
+# O portal agora exige login. Scripts entram com a chave de automação: defina
+# TRIAGEM_API_KEY (o mesmo valor configurado na Vercel) antes de rodar.
+API_KEY = (os.environ.get("TRIAGEM_API_KEY") or os.environ.get("SEED_API_KEY") or "").strip()
+
+
 def request(method: str, path: str, data: dict | None = None) -> dict | list:
     body = None
     headers = {}
+    if API_KEY:
+        headers["X-API-Key"] = API_KEY
     if data is not None:
         body = json.dumps(data).encode("utf-8")
         headers["Content-Type"] = "application/json"

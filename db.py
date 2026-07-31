@@ -42,6 +42,18 @@ CREATE TABLE IF NOT EXISTS analyses (
     resultado         JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
+-- Usuários do portal (login individual). Senha sempre em hash — nunca em texto.
+CREATE TABLE IF NOT EXISTS users (
+    id            TEXT PRIMARY KEY,
+    email         TEXT NOT NULL UNIQUE,
+    nome          TEXT NOT NULL DEFAULT '',
+    senha_hash    TEXT NOT NULL,
+    criado_em     TEXT NOT NULL,
+    ultimo_acesso TEXT,
+    falhas        INTEGER NOT NULL DEFAULT 0,
+    bloqueado_ate TEXT
+);
+
 CREATE TABLE IF NOT EXISTS audit_events (
     id         TEXT PRIMARY KEY,
     criado_em  TEXT NOT NULL,
@@ -54,6 +66,13 @@ CREATE TABLE IF NOT EXISTS audit_events (
 
 CREATE INDEX IF NOT EXISTS idx_analyses_criado_em ON analyses (criado_em DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_criado_em ON audit_events (criado_em DESC);
+
+-- Cópia do currículo original, para abrir/baixar na página do candidato.
+-- Colunas adicionadas depois da 1ª versão: análises antigas ficam com NULL
+-- (a tela mostra "arquivo não guardado" nesses casos).
+ALTER TABLE analyses ADD COLUMN IF NOT EXISTS arquivo_mime    TEXT NOT NULL DEFAULT '';
+ALTER TABLE analyses ADD COLUMN IF NOT EXISTS arquivo_tamanho INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE analyses ADD COLUMN IF NOT EXISTS arquivo_bytes   BYTEA;
 """
 
 

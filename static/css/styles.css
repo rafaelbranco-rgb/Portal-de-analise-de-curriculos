@@ -2651,3 +2651,263 @@ html {
     animation: none !important;
   }
 }
+
+/* ============================================================
+   Sessão: usuário conectado na topbar
+   ============================================================ */
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  max-width: 200px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease, padding 0.45s ease;
+}
+
+/* Some junto com os botões quando a barra minimiza */
+.topbar.topbar-min .topnav .nav-user {
+  max-width: 0;
+  padding: 0;
+  opacity: 0;
+}
+.topbar.topbar-min .topnav:hover .nav-user {
+  max-width: 200px;
+  padding: 0 10px;
+  opacity: 1;
+}
+
+/* ============================================================
+   Currículo anexado à página do candidato
+   ============================================================ */
+.cv-attachment {
+  margin: -4px 0 18px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cv-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cv-icon {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--aurora-blue-soft);
+  background: rgba(63, 111, 245, 0.12);
+  border: 1px solid rgba(125, 167, 255, 0.24);
+}
+
+.cv-info {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.cv-label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.cv-file {
+  font-size: 13.5px;
+  color: var(--text-1);
+  word-break: break-word;
+}
+
+.cv-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cv-actions .btn {
+  padding: 9px 14px;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.cv-empty {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+.cv-preview {
+  margin-top: 14px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.cv-preview iframe {
+  display: block;
+  width: 100%;
+  height: 72vh;
+  min-height: 420px;
+  border: none;
+  background: #fff;
+}
+
+/* Clipe no histórico: indica que o currículo está guardado */
+.cv-tag {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 5px;
+  border-radius: 999px;
+  color: var(--aurora-blue-soft);
+  background: rgba(63, 111, 245, 0.12);
+  border: 1px solid rgba(125, 167, 255, 0.26);
+}
+
+/* ============================================================
+   Acesso e usuários (Opções)
+   ============================================================ */
+.account-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: rgba(63, 111, 245, 0.05);
+}
+
+.account-label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.account-name {
+  font-size: 14px;
+  color: var(--text-1);
+  word-break: break-word;
+}
+
+.users-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.users-header .section-label {
+  margin: 0;
+}
+
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (max-width: 720px) {
+  .user-row { grid-template-columns: 1fr; }
+  .user-row-actions { justify-content: flex-start; }
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-1);
+}
+
+.user-you {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: var(--aurora-gold);
+  background: rgba(216, 170, 83, 0.12);
+  border: 1px solid rgba(216, 170, 83, 0.3);
+}
+
+.user-email {
+  font-size: 12px;
+  color: var(--text-3);
+  word-break: break-all;
+}
+
+.user-access {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.user-row-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.user-row-actions .btn {
+  padding: 8px 12px;
+  font-size: 11.5px;
+}
+
+.modal-desc {
+  margin: -8px 0 16px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+/* ============================================================
+   Tema claro — ajustes dos blocos acima
+   ============================================================ */
+:root[data-theme="light"] .cv-attachment,
+:root[data-theme="light"] .user-row {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(30, 50, 90, 0.12);
+}
+
+:root[data-theme="light"] .account-line {
+  background: rgba(63, 111, 245, 0.07);
+  border-color: rgba(63, 111, 245, 0.18);
+}
+
+:root[data-theme="light"] .cv-preview {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(30, 50, 90, 0.12);
+}

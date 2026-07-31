@@ -3,6 +3,23 @@
   "use strict";
 
   // ---------------------------------------------------------------
+  // Sessão: toda chamada ao servidor passa por aqui. Se a sessão caiu
+  // (HTTP 401), volta para a tela de login em vez de mostrar erro solto.
+  // A função declarada com o nome `fetch` sombreia o fetch nativo dentro
+  // deste arquivo, então nenhuma chamada existente escapa da checagem.
+  // ---------------------------------------------------------------
+  const nativeFetch = window.fetch.bind(window);
+
+  async function fetch(url, opts) {
+    const resp = await nativeFetch(url, opts);
+    if (resp.status === 401) {
+      window.location.href = "/login?expirado=1";
+      throw new Error("Sessão expirada");
+    }
+    return resp;
+  }
+
+  // ---------------------------------------------------------------
   // Navegação
   // ---------------------------------------------------------------
   const sections = document.querySelectorAll("main > .section");
@@ -24,6 +41,7 @@
     if (id === "settings") {
       renderThemeToggle();
       refreshSystemStatus();
+      loadUsers();
     }
     if (window.LiquidTilt) window.LiquidTilt.bind(document);
   }
@@ -139,6 +157,14 @@
     if (k === "alta") return "var(--ok)";
     if (k === "baixa") return "var(--bad)";
     return "var(--warn)";
+  }
+
+  function formatBytes(n) {
+    const v = Number(n) || 0;
+    if (v <= 0) return "";
+    if (v < 1024) return v + " B";
+    if (v < 1024 * 1024) return (v / 1024).toFixed(0) + " KB";
+    return (v / (1024 * 1024)).toFixed(1) + " MB";
   }
 
   function formatDate(iso) {
@@ -335,9 +361,13 @@
       }
 
       renderResult(data.resultado, {
+        id: data.id,
         candidato: data.candidato_nome,
         arquivo: data.arquivo,
         criado_em: data.criado_em,
+        tem_arquivo: data.tem_arquivo,
+        arquivo_mime: data.arquivo_mime,
+        arquivo_tamanho: data.arquivo_tamanho,
       });
       showAnalyzeState("result");
       toast("Análise concluída e salva no histórico.", "success");
@@ -367,6 +397,9 @@
     if (meta && meta.arquivo) metaParts.push(meta.arquivo);
     if (meta && meta.criado_em) metaParts.push(formatDate(meta.criado_em));
     document.getElementById("candidate-meta").textContent = metaParts.join(" · ") || "—";
+
+    // Currículo original anexado à página do candidato
+    renderCurriculo(meta || {});
 
     // Score ring
     const score = Number(r.score_final || 0);
@@ -424,6 +457,65 @@
     );
     sortedVagas.forEach((v) => {
       vagaList.appendChild(buildVagaRow(v));
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // Currículo anexado à página do candidato
+  // ---------------------------------------------------------------
+  const cvBlock = document.getElementById("cv-attachment");
+  const cvFileName = document.getElementById("cv-file-name");
+  const cvActions = document.getElementById("cv-actions");
+  const cvEmpty = document.getElementById("cv-empty");
+  const cvPreview = document.getElementById("cv-preview");
+  const cvPreviewBtn = document.getElementById("cv-preview-btn");
+  const cvFrame = document.getElementById("cv-frame");
+  const cvOpenLink = document.getElementById("cv-open-link");
+  const cvDownloadLink = document.getElementById("cv-download-link");
+
+  function renderCurriculo(meta) {
+    if (!cvBlock) return;
+
+    // Fecha a pré-visualização da análise anterior.
+    cvPreview.hidden = true;
+    cvFrame.src = "about:blank";
+    cvPreviewBtn.textContent = "Ver aqui";
+
+    if (!meta.id) {
+      cvBlock.hidden = true;
+      return;
+    }
+    cvBlock.hidden = false;
+
+    const tamanho = formatBytes(meta.arquivo_tamanho);
+    cvFileName.textContent =
+      (meta.arquivo || "currículo") + (tamanho ? " · " + tamanho : "");
+
+    if (!meta.tem_arquivo) {
+      cvActions.hidden = true;
+      cvEmpty.hidden = false;
+      return;
+    }
+    cvActions.hidden = false;
+    cvEmpty.hidden = true;
+
+    const url = `/api/analyses/${meta.id}/curriculo`;
+    cvOpenLink.href = url;
+    cvDownloadLink.href = url + "?download=1";
+
+    // PDF e TXT abrem dentro da página; DOCX o navegador não renderiza.
+    const mime = meta.arquivo_mime || "";
+    const podeVerAqui = mime.indexOf("pdf") >= 0 || mime.indexOf("text/") === 0;
+    cvPreviewBtn.hidden = !podeVerAqui;
+    cvPreviewBtn.dataset.url = url;
+  }
+
+  if (cvPreviewBtn) {
+    cvPreviewBtn.addEventListener("click", () => {
+      const abrindo = cvPreview.hidden;
+      cvFrame.src = abrindo ? cvPreviewBtn.dataset.url || "about:blank" : "about:blank";
+      cvPreview.hidden = !abrindo;
+      cvPreviewBtn.textContent = abrindo ? "Fechar" : "Ver aqui";
     });
   }
 
@@ -799,9 +891,17 @@
                <path d="M9 8.5l1.5 6.5h4l3 5"/><circle cx="9" cy="18" r="3.5"/>
              </svg>PCD</span>`
         : "";
+      const cvTag = it.tem_arquivo
+        ? `<span class="cv-tag" title="Currículo guardado — abre no laudo">
+             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+               <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+             </svg>
+           </span>`
+        : "";
       row.innerHTML = `
         <div class="candidate">
-          <div class="candidate-name"><span class="cand-name-text">${escapeHTML(it.candidato_nome || "(sem nome)")}</span>${pcdTag}</div>
+          <div class="candidate-name"><span class="cand-name-text">${escapeHTML(it.candidato_nome || "(sem nome)")}</span>${pcdTag}${cvTag}</div>
           <div class="candidate-file">${escapeHTML(it.arquivo || "")}</div>
         </div>
         <div class="col-job" title="${escapeHTML(it.vaga_recomendada || "")}">
@@ -866,9 +966,13 @@
         return;
       }
       renderResult(data.resultado, {
+        id: data.id,
         candidato: data.candidato_nome,
         arquivo: data.arquivo,
         criado_em: data.criado_em,
+        tem_arquivo: data.tem_arquivo,
+        arquivo_mime: data.arquivo_mime,
+        arquivo_tamanho: data.arquivo_tamanho,
       });
       showAnalyzeState("result");
       showSection("analyze");
@@ -891,12 +995,18 @@
   function categoryLabel(cat) {
     if (cat === "vaga") return "Vaga";
     if (cat === "analise") return "Análise";
+    if (cat === "triagem") return "Triagem";
+    if (cat === "acesso") return "Acesso";
+    if (cat === "usuario") return "Usuário";
     if (cat === "sistema") return "Sistema";
     return cat || "—";
   }
 
   function metaForAuditRow(ev) {
     const m = ev.meta || {};
+    if (ev.category === "acesso" || ev.category === "usuario") {
+      return m.usuario || m.email || "";
+    }
     if (ev.category === "analise" && m.candidato && m.score != null) {
       return `${m.candidato} · ${m.vaga_recomendada || "—"} · score ${Number(m.score).toFixed(1)}`;
     }
@@ -1060,6 +1170,8 @@
       jobs: document.getElementById("status-jobs"),
       analyses: document.getElementById("status-analyses"),
       events: document.getElementById("status-events"),
+      users: document.getElementById("status-users"),
+      secret: document.getElementById("status-secret"),
     };
     try {
       const [health, jobs, analyses, events] = await Promise.all([
@@ -1077,10 +1189,272 @@
         ? String(analyses.length)
         : "0";
       els.events.textContent = Array.isArray(events) ? String(events.length) : "0";
+      els.users.textContent =
+        health.usuarios == null ? "—" : String(health.usuarios);
+      els.secret.innerHTML = health.secret_key_configurada
+        ? '<span class="ok">Configurada</span>'
+        : '<span class="bad">Derivada (defina SECRET_KEY)</span>';
     } catch (_) {
       /* ignora */
     }
   }
+
+  // ---------------------------------------------------------------
+  // Sessão, usuários e senhas
+  // ---------------------------------------------------------------
+  const navUser = document.getElementById("nav-user");
+  const logoutBtn = document.getElementById("logout-btn");
+  const accountName = document.getElementById("account-name");
+  const usersList = document.getElementById("users-list");
+  const newUserBtn = document.getElementById("new-user-btn");
+  const changeMyPasswordBtn = document.getElementById("change-my-password-btn");
+
+  const userModal = document.getElementById("user-modal");
+  const userNomeEl = document.getElementById("user-nome");
+  const userEmailEl = document.getElementById("user-email");
+  const userSenhaEl = document.getElementById("user-senha");
+  const userSenha2El = document.getElementById("user-senha2");
+  const userSaveBtn = document.getElementById("user-save-btn");
+  const userCancelBtn = document.getElementById("user-cancel-btn");
+
+  const senhaModal = document.getElementById("senha-modal");
+  const senhaModalTitle = document.getElementById("senha-modal-title");
+  const senhaModalDesc = document.getElementById("senha-modal-desc");
+  const senhaAtualField = document.getElementById("senha-atual-field");
+  const senhaAtualEl = document.getElementById("senha-atual");
+  const senhaNovaEl = document.getElementById("senha-nova");
+  const senhaNova2El = document.getElementById("senha-nova2");
+  const senhaSaveBtn = document.getElementById("senha-save-btn");
+  const senhaCancelBtn = document.getElementById("senha-cancel-btn");
+
+  let me = null;
+  let senhaAlvo = null; // null = trocar a própria senha; {id, nome} = redefinir
+
+  async function loadMe() {
+    try {
+      const resp = await fetch("/api/auth/me");
+      me = await resp.json();
+    } catch (_) {
+      return;
+    }
+    const label = me.nome || me.email || "—";
+    if (navUser) {
+      navUser.textContent = label;
+      navUser.title = "Conectado como " + (me.email || label);
+    }
+    if (accountName) {
+      accountName.textContent = me.email ? `${label} · ${me.email}` : label;
+    }
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+      } catch (_) {
+        /* sai de qualquer forma */
+      }
+      window.location.href = "/login";
+    });
+  }
+
+  async function loadUsers() {
+    if (!usersList) return;
+    try {
+      const resp = await fetch("/api/users");
+      const users = await resp.json();
+      if (!Array.isArray(users)) return;
+      usersList.innerHTML = "";
+      users.forEach((u) => {
+        const row = document.createElement("div");
+        row.className = "user-row";
+        row.innerHTML = `
+          <div class="user-ident">
+            <div class="user-name">
+              ${escapeHTML(u.nome || "—")}
+              ${u.eu ? '<span class="user-you">você</span>' : ""}
+            </div>
+            <div class="user-email">${escapeHTML(u.email || "")}</div>
+          </div>
+          <div class="user-access">${
+            u.ultimo_acesso
+              ? "Último acesso: " + escapeHTML(formatDate(u.ultimo_acesso))
+              : "Nunca acessou"
+          }</div>
+          <div class="user-row-actions">
+            <button class="btn btn-ghost" data-action="senha">Redefinir senha</button>
+            <button class="btn btn-danger" data-action="remover" ${u.eu ? "disabled" : ""}>
+              Remover
+            </button>
+          </div>
+        `;
+        row
+          .querySelector('[data-action="senha"]')
+          .addEventListener("click", () => {
+            if (u.eu) openSenhaModal(null);
+            else openSenhaModal({ id: u.id, nome: u.nome || u.email });
+          });
+        row
+          .querySelector('[data-action="remover"]')
+          .addEventListener("click", async () => {
+            if (
+              !confirm(
+                `Remover o acesso de "${u.nome || u.email}"? A pessoa não conseguirá mais entrar.`
+              )
+            )
+              return;
+            try {
+              const r = await fetch(`/api/users/${u.id}`, { method: "DELETE" });
+              const d = await r.json();
+              if (!r.ok) throw new Error(d.error || "Erro ao remover.");
+              toast("Usuário removido.", "success");
+              loadUsers();
+            } catch (err) {
+              toast(err.message, "error");
+            }
+          });
+        usersList.appendChild(row);
+      });
+    } catch (err) {
+      toast("Erro ao carregar usuários: " + err.message, "error");
+    }
+  }
+
+  function openUserModal() {
+    userNomeEl.value = "";
+    userEmailEl.value = "";
+    userSenhaEl.value = "";
+    userSenha2El.value = "";
+    userModal.classList.add("show");
+    setTimeout(() => userNomeEl.focus(), 80);
+  }
+
+  function closeUserModal() {
+    userModal.classList.remove("show");
+  }
+
+  if (newUserBtn) newUserBtn.addEventListener("click", openUserModal);
+  if (userCancelBtn) userCancelBtn.addEventListener("click", closeUserModal);
+  if (userModal) {
+    userModal.addEventListener("click", (e) => {
+      if (e.target === userModal) closeUserModal();
+    });
+  }
+
+  if (userSaveBtn) {
+    userSaveBtn.addEventListener("click", async () => {
+      const senha = userSenhaEl.value;
+      if (senha !== userSenha2El.value) {
+        toast("As senhas não coincidem.", "error");
+        return;
+      }
+      if (senha.length < 8) {
+        toast("A senha precisa ter pelo menos 8 caracteres.", "error");
+        return;
+      }
+      userSaveBtn.disabled = true;
+      try {
+        const r = await fetch("/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nome: userNomeEl.value.trim(),
+            email: userEmailEl.value.trim(),
+            senha: senha,
+          }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || "Erro ao criar usuário.");
+        toast("Usuário criado. Avise a pessoa da senha definida.", "success");
+        closeUserModal();
+        loadUsers();
+      } catch (err) {
+        toast(err.message, "error");
+      } finally {
+        userSaveBtn.disabled = false;
+      }
+    });
+  }
+
+  function openSenhaModal(alvo) {
+    senhaAlvo = alvo;
+    senhaAtualEl.value = "";
+    senhaNovaEl.value = "";
+    senhaNova2El.value = "";
+    if (alvo) {
+      senhaModalTitle.textContent = "Redefinir senha";
+      senhaModalDesc.textContent =
+        `Defina uma nova senha para ${alvo.nome} e avise a pessoa. ` +
+        "A senha antiga deixa de funcionar na hora.";
+      senhaAtualField.hidden = true;
+    } else {
+      senhaModalTitle.textContent = "Trocar minha senha";
+      senhaModalDesc.textContent = "";
+      senhaAtualField.hidden = false;
+    }
+    senhaModal.classList.add("show");
+    setTimeout(() => (alvo ? senhaNovaEl : senhaAtualEl).focus(), 80);
+  }
+
+  function closeSenhaModal() {
+    senhaModal.classList.remove("show");
+    senhaAlvo = null;
+  }
+
+  if (changeMyPasswordBtn) {
+    changeMyPasswordBtn.addEventListener("click", () => openSenhaModal(null));
+  }
+  if (senhaCancelBtn) senhaCancelBtn.addEventListener("click", closeSenhaModal);
+  if (senhaModal) {
+    senhaModal.addEventListener("click", (e) => {
+      if (e.target === senhaModal) closeSenhaModal();
+    });
+  }
+
+  if (senhaSaveBtn) {
+    senhaSaveBtn.addEventListener("click", async () => {
+      const nova = senhaNovaEl.value;
+      if (nova !== senhaNova2El.value) {
+        toast("As senhas não coincidem.", "error");
+        return;
+      }
+      if (nova.length < 8) {
+        toast("A senha precisa ter pelo menos 8 caracteres.", "error");
+        return;
+      }
+      senhaSaveBtn.disabled = true;
+      try {
+        const url = senhaAlvo
+          ? `/api/users/${senhaAlvo.id}/senha`
+          : "/api/auth/senha";
+        const body = senhaAlvo
+          ? { senha: nova }
+          : { senha_atual: senhaAtualEl.value, nova_senha: nova };
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || "Erro ao salvar a senha.");
+        toast(senhaAlvo ? "Senha redefinida." : "Senha alterada.", "success");
+        closeSenhaModal();
+        loadUsers();
+      } catch (err) {
+        toast(err.message, "error");
+      } finally {
+        senhaSaveBtn.disabled = false;
+      }
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (userModal && userModal.classList.contains("show")) closeUserModal();
+    if (senhaModal && senhaModal.classList.contains("show")) closeSenhaModal();
+  });
+
+  loadMe();
 
   // ---------------------------------------------------------------
   // Health

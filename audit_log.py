@@ -17,13 +17,35 @@ from db import get_cursor, init_db
 MAX_EVENTS = 500  # mantém só os últimos N eventos para a UI
 
 EventLevel = Literal["info", "warn", "error"]
-EventCategory = Literal["vaga", "analise", "sistema"]
+EventCategory = Literal["vaga", "analise", "triagem", "sistema", "acesso", "usuario"]
 
 _COLS = "id, criado_em, category, action, level, message, meta"
 
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _ator() -> dict[str, Any]:
+    """Identifica o usuário logado, quando houver, para gravar no evento.
+
+    Import tardio de ``auth`` de propósito: ``auth`` usa este módulo, então
+    importar no topo criaria dependência circular. Automações (webhook do
+    Monday, /api/triagem) não têm usuário e caem no dicionário vazio.
+    """
+    try:
+        from flask import has_request_context
+
+        if not has_request_context():
+            return {}
+        import auth
+
+        user = auth.current_user()
+        if not user:
+            return {}
+        return {"usuario": user.get("email"), "usuario_nome": user.get("nome")}
+    except Exception:  # noqa: BLE001 — auditoria nunca pode derrubar a operação
+        return {}
 
 
 def log(
@@ -41,7 +63,7 @@ def log(
         "action": action,
         "level": level,
         "message": message,
-        "meta": meta or {},
+        "meta": {**(meta or {}), **_ator()},
     }
     with get_cursor() as cur:
         cur.execute(
